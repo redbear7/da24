@@ -5,7 +5,7 @@
   --bg-card: #ffffff;
   --bg-primary: #3B6DF5;
   --bg-primary-hover: #2B5AD9;
-  --bg-secondary: #F0F4FF;
+  --bg-secondary: #EEF3FF;
   --bg-accent: #FF4D4D;
   --bg-hero: linear-gradient(135deg, #1E3A8A 0%, #3B6DF5 100%);
 
@@ -53,15 +53,26 @@
 body {
   background: var(--bg-surface);
   color: var(--text-primary);
-  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Smooth scroll */
 html { scroll-behavior: smooth; }
 
+/* Mobile touch tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Selection */
 ::selection {
   background: var(--bg-primary);
   color: white;
+}
+
+/* Safe area support for notched phones */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

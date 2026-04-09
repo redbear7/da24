@@ -32,7 +32,7 @@ export default function PlanTypeSelector({ selected, onChange }: Props) {
             <button
               key={type}
               onClick={() => onChange(type)}
-              className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl text-center transition-all ${
+              className={`flex flex-col items-center gap-1.5 py-3.5 px-1 rounded-xl text-center transition-all active:scale-[0.97] ${
                 isActive
                   ? "bg-primary text-white shadow-md"
                   : "bg-white text-text-secondary border border-border-main hover:border-primary/30"

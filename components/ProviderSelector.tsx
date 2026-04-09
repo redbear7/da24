@@ -1,7 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { PROVIDERS, ProviderKey } from "@/lib/types";
 import { Check } from "lucide-react";
+
+const LOGO_MAP: Record<ProviderKey, string> = {
+  kt: "/images/logo-kt.svg",
+  lg: "/images/logo-lg.svg",
+  sk: "/images/logo-sk.svg",
+  other: "/images/logo-other.svg",
+};
 
 interface Props {
   selected: ProviderKey;
@@ -21,7 +29,7 @@ export default function ProviderSelector({ selected, onChange }: Props) {
             <button
               key={provider.key}
               onClick={() => onChange(provider.key)}
-              className={`relative flex flex-col items-center justify-center py-4 px-2 rounded-xl transition-all ${
+              className={`relative flex flex-col items-center justify-center py-3.5 px-2 rounded-xl transition-all ${
                 isActive
                   ? "bg-white border-2 shadow-md"
                   : "bg-white border border-border-main hover:border-gray-300"
@@ -40,12 +48,16 @@ export default function ProviderSelector({ selected, onChange }: Props) {
                 </div>
               )}
 
-              {/* Provider Logo/Text */}
-              <div
-                className="text-xl font-extrabold mb-1"
-                style={{ color: isActive ? provider.color : "#9CA3AF" }}
-              >
-                {provider.key === "lg" ? "U+" : provider.key === "other" ? "기타" : provider.name}
+              {/* Provider Logo */}
+              <div className="mb-2">
+                <Image
+                  src={LOGO_MAP[provider.key]}
+                  alt={provider.name}
+                  width={56}
+                  height={22}
+                  className={`transition-opacity ${isActive ? "opacity-100" : "opacity-50"}`}
+                  unoptimized
+                />
               </div>
               <span
                 className={`text-[11px] font-medium ${

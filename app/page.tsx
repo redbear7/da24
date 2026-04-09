@@ -58,7 +58,7 @@ export default function InternetPage() {
       <PriceDisplay plan={selectedPlan} provider={provider} />
 
       {/* Fixed CTA Bottom Bar */}
-      <div className="sticky bottom-0 z-40 bg-white border-t border-border-main shadow-lg">
+      <div className="sticky bottom-0 z-40 bg-white border-t border-border-main shadow-lg safe-bottom">
         <div className="max-w-[480px] mx-auto px-5 py-3 flex gap-3">
           <a
             href="tel:1588-0000"
