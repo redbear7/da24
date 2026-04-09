@@ -38,8 +38,8 @@ export default function Benefits() {
               <Icon className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
-              <p className="text-[14px] font-bold text-foreground mb-0.5">{b.title}</p>
-              <p className="text-[12px] text-text-secondary leading-relaxed whitespace-pre-line">
+              <p className="text-[15px] font-bold text-foreground mb-0.5">{b.title}</p>
+              <p className="text-[13px] text-text-secondary leading-relaxed whitespace-pre-line">
                 {b.description}
               </p>
             </div>

@@ -59,14 +59,14 @@ export default function ChatPage() {
               <h1 className="text-[22px] font-bold text-foreground">
                 쉽고, 빠르게 이용하기
               </h1>
-              <p className="text-[14px] text-text-secondary mt-3 leading-relaxed">
+              <p className="text-[15px] text-text-secondary mt-3 leading-relaxed">
                 최초 1회만 번호 인증을 하시면<br />
                 무료 견적 상담 및 내 신청 내역 기능을<br />
                 자유롭게 이용하실 수 있어요!
               </p>
               <button
                 onClick={() => setStep("phone")}
-                className="w-full mt-10 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all"
+                className="w-full mt-10 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 인증하기
               </button>
@@ -78,7 +78,7 @@ export default function ChatPage() {
             <div>
               <button
                 onClick={() => setStep("intro")}
-                className="flex items-center gap-1 text-[13px] text-text-secondary mb-6 hover:text-foreground transition-colors"
+                className="flex items-center gap-1 text-[14px] text-text-secondary mb-6 hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 뒤로
@@ -88,12 +88,12 @@ export default function ChatPage() {
                   <Phone className="w-6 h-6 text-primary" />
                 </div>
                 <h1 className="text-[20px] font-bold text-foreground">번호 인증</h1>
-                <p className="text-[14px] text-text-secondary mt-2">
+                <p className="text-[15px] text-text-secondary mt-2">
                   휴대폰 번호를 입력해 주세요
                 </p>
               </div>
               <label className="block mb-4">
-                <span className="text-[13px] font-semibold text-foreground mb-1.5 block">
+                <span className="text-[14px] font-semibold text-foreground mb-1.5 block">
                   휴대폰 번호
                 </span>
                 <input
@@ -101,13 +101,13 @@ export default function ChatPage() {
                   value={phone}
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
                   placeholder="010-1234-5678"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
               </label>
               <button
                 onClick={handleSendCode}
                 disabled={isLoading || phone.replace(/\D/g, "").length < 10}
-                className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -123,7 +123,7 @@ export default function ChatPage() {
             <div>
               <button
                 onClick={() => { setCode(""); setStep("phone"); }}
-                className="flex items-center gap-1 text-[13px] text-text-secondary mb-6 hover:text-foreground transition-colors"
+                className="flex items-center gap-1 text-[14px] text-text-secondary mb-6 hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 뒤로
@@ -133,13 +133,13 @@ export default function ChatPage() {
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
                 <h1 className="text-[20px] font-bold text-foreground">인증번호 입력</h1>
-                <p className="text-[14px] text-text-secondary mt-2">
+                <p className="text-[15px] text-text-secondary mt-2">
                   <span className="font-semibold text-foreground">{phone}</span>으로<br />
                   발송된 인증번호를 입력해 주세요
                 </p>
               </div>
               <label className="block mb-4">
-                <span className="text-[13px] font-semibold text-foreground mb-1.5 block">
+                <span className="text-[14px] font-semibold text-foreground mb-1.5 block">
                   인증번호
                 </span>
                 <input
@@ -148,13 +148,13 @@ export default function ChatPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="인증번호 6자리"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
                 />
               </label>
               <button
                 onClick={handleConfirm}
                 disabled={isLoading || code.length < 6}
-                className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -165,7 +165,7 @@ export default function ChatPage() {
               <button
                 onClick={handleResend}
                 disabled={isLoading}
-                className="w-full mt-3 flex items-center justify-center gap-1.5 py-3 text-[13px] text-text-secondary hover:text-foreground transition-colors disabled:opacity-50"
+                className="w-full mt-3 flex items-center justify-center gap-1.5 py-3 text-[14px] text-text-secondary hover:text-foreground transition-colors disabled:opacity-50"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 인증번호 재발송
@@ -182,13 +182,13 @@ export default function ChatPage() {
               <h1 className="text-[20px] font-bold text-foreground">
                 채팅 내역이 없습니다
               </h1>
-              <p className="text-[14px] text-text-secondary mt-2 leading-relaxed">
+              <p className="text-[15px] text-text-secondary mt-2 leading-relaxed">
                 인터넷 상담을 신청하시면<br />
                 채팅 내역이 표시됩니다.
               </p>
               <a
                 href="/"
-                className="block w-full mt-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] text-center hover:opacity-90 active:scale-[0.98] transition-all"
+                className="block w-full mt-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] text-center hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 인터넷 비교하러 가기
               </a>

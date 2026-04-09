@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ========== Light Mode (default) ========== */
+/* ========== 기본값 (블루모드) ========== */
 :root {
   --background: #FFFFFF;
   --foreground: #1A1A2E;
@@ -26,6 +26,57 @@
   --ring: #2640E6;
 }
 
+/* ========== Airbnb 모드 ========== */
+[data-color-mode="airbnb"] {
+  --background: #FFFFFF;
+  --foreground: #222222;
+  --muted: #F7F7F7;
+  --muted-foreground: #717171;
+  --card: #FFFFFF;
+  --card-foreground: #222222;
+  --border: #DDDDDD;
+  --border-subtle: #EBEBEB;
+  --primary: #FF385C;
+  --primary-foreground: #FFFFFF;
+  --secondary: #FFF0F3;
+  --secondary-foreground: #FF385C;
+  --accent: #FF385C;
+  --accent-foreground: #FFFFFF;
+  --text-secondary: #6A6A6A;
+  --text-muted: #717171;
+  --bottom-bar-bg: #222222;
+  --bottom-bar-text: #FFFFFF;
+  --provider-kt: #000000;
+  --provider-lg: #E6007E;
+  --provider-sk: #EA002C;
+  --ring: #FF385C;
+}
+
+/* ========== Replicate 모드 ========== */
+[data-color-mode="replicate"] {
+  --background: #FFFFFF;
+  --foreground: #202020;
+  --muted: #F5F5F5;
+  --muted-foreground: #8D8D8D;
+  --card: #FFFFFF;
+  --card-foreground: #202020;
+  --border: #E0E0E0;
+  --border-subtle: #EEEEEE;
+  --primary: #EA2804;
+  --primary-foreground: #FFFFFF;
+  --secondary: #FFF2EF;
+  --secondary-foreground: #EA2804;
+  --accent: #EA2804;
+  --accent-foreground: #FFFFFF;
+  --text-secondary: #4E4E4E;
+  --text-muted: #8D8D8D;
+  --bottom-bar-bg: #202020;
+  --bottom-bar-text: #FFFFFF;
+  --provider-kt: #000000;
+  --provider-lg: #E6007E;
+  --provider-sk: #EA002C;
+  --ring: #EA2804;
+}
 
 @theme inline {
   --color-background: var(--background);

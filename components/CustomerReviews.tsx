@@ -82,29 +82,29 @@ export default function CustomerReviews() {
 
   return (
     <section className="max-w-[640px] mx-auto px-5 py-6">
-      <h2 className="text-[16px] font-bold text-foreground mb-4">고객 후기</h2>
+      <h2 className="text-[18px] font-bold text-foreground mb-4">고객 후기</h2>
 
       <div className="flex flex-col divide-y divide-border">
         {visible.map((r, i) => (
           <div key={i} className="py-4 first:pt-0">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[14px] font-semibold text-foreground">{r.name}</span>
-              <span className="text-[11px] text-text-muted">{r.date}</span>
+              <span className="text-[15px] font-semibold text-foreground">{r.name}</span>
+              <span className="text-[12px] text-text-muted">{r.date}</span>
             </div>
             <div className="flex items-center gap-2 mb-1.5">
               <StarRating rating={r.rating} />
             </div>
-            <p className="text-[12px] font-semibold text-primary mb-1.5">
+            <p className="text-[13px] font-semibold text-primary mb-1.5">
               지원금: {r.subsidy}
             </p>
-            <p className="text-[13px] text-text-secondary leading-relaxed mb-2">
+            <p className="text-[14px] text-text-secondary leading-relaxed mb-2">
               {r.content}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {r.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] text-text-muted bg-muted px-2 py-0.5 rounded-md"
+                  className="text-[12px] text-text-muted bg-muted px-2 py-0.5 rounded-md"
                 >
                   {tag}
                 </span>
@@ -117,7 +117,7 @@ export default function CustomerReviews() {
       {!showAll && REVIEWS.length > INITIAL_VISIBLE && (
         <button
           onClick={() => setShowAll(true)}
-          className="w-full flex items-center justify-center gap-1 mt-2 py-3 text-[13px] text-text-secondary border border-border rounded-xl transition-colors hover:border-primary/40"
+          className="w-full flex items-center justify-center gap-1 mt-2 py-3 text-[14px] text-text-secondary border border-border rounded-xl transition-colors hover:border-primary/40"
         >
           고객 후기 더보기
           <ChevronDown className="w-4 h-4" />

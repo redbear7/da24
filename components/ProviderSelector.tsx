@@ -37,7 +37,7 @@ const LOGO_CONFIG: Record<ProviderKey, {
   },
   other: {
     text: "알뜰 인터넷",
-    style: "font-[600] text-[14px]",
+    style: "font-[600] text-[15px]",
     color: "#5A6278",
     inactiveColor: "#C0C5D0",
   },
@@ -46,7 +46,7 @@ const LOGO_CONFIG: Record<ProviderKey, {
 export default function ProviderSelector({ selected, onChange }: Props) {
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
-      <h2 className="text-[16px] font-bold text-foreground mb-4">통신사 선택</h2>
+      <h2 className="text-[18px] font-bold text-foreground mb-4">통신사 선택</h2>
 
       <div className="grid grid-cols-4 gap-3">
         {PROVIDERS.map((provider) => {

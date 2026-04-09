@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ClipboardList } from "lucide-react";
+import ColorModeToggle from "./ColorModeToggle";
 
 export default function Header() {
   return (
@@ -20,11 +21,12 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <Link href="/chat" className="flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
+          <ColorModeToggle />
+          <Link href="/chat" className="flex items-center gap-1.5 px-3.5 py-2 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
             <MessageCircle className="w-3.5 h-3.5" />
             채팅내역
           </Link>
-          <Link href="/history" className="flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
+          <Link href="/history" className="flex items-center gap-1.5 px-3.5 py-2 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
             <ClipboardList className="w-3.5 h-3.5" />
             내 신청내역
           </Link>

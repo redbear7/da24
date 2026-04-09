@@ -74,7 +74,7 @@ export default function ConsultationForm({
   if (!isOpen) return null;
 
   const inputCls =
-    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[14px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
+    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
@@ -157,7 +157,7 @@ export default function ConsultationForm({
             <button
               type="submit"
               disabled={isSubmitting || !name.trim() || !phone.trim()}
-              className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -169,7 +169,7 @@ export default function ConsultationForm({
               )}
             </button>
 
-            <p className="text-[10px] text-text-muted text-center mt-3">
+            <p className="text-[11px] text-text-muted text-center mt-3">
               신청 시 개인정보 수집·이용에 동의한 것으로 간주됩니다.
             </p>
           </form>
