@@ -1,14 +1,6 @@
 "use client";
 
 import { PlanType, PLAN_TYPE_LABELS, PLAN_TYPE_DESCRIPTIONS } from "@/lib/types";
-import { UserPlus, RefreshCw, FileCheck, Truck } from "lucide-react";
-
-const ICONS: Record<PlanType, typeof UserPlus> = {
-  new: UserPlus,
-  change: RefreshCw,
-  renew: FileCheck,
-  move: Truck,
-};
 
 interface Props {
   selected: PlanType;
@@ -19,40 +11,35 @@ export default function PlanTypeSelector({ selected, onChange }: Props) {
   const types: PlanType[] = ["new", "change", "renew", "move"];
 
   return (
-    <section id="plan-selector" className="max-w-[480px] mx-auto px-5 pt-8 pb-4">
-      <h2 className="text-lg font-bold text-text-primary mb-1">가입유형 선택</h2>
-      <p className="text-sm text-text-muted mb-4">해당하는 가입 유형을 선택해 주세요</p>
+    <section id="plan-selector" className="max-w-[640px] mx-auto px-5 pb-6">
+      <h2 className="text-[16px] font-bold text-foreground mb-4">가입 유형 선택</h2>
 
-      {/* Tabs */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      {/* Tab row - matches original: bordered tabs, active has blue text + bottom border feel */}
+      <div className="grid grid-cols-4 border border-border rounded-xl overflow-hidden">
         {types.map((type) => {
-          const Icon = ICONS[type];
           const isActive = selected === type;
           return (
             <button
               key={type}
               onClick={() => onChange(type)}
-              className={`flex flex-col items-center gap-1.5 py-3.5 px-1 rounded-xl text-center transition-all active:scale-[0.97] ${
+              className={`py-3.5 text-[13px] sm:text-[14px] font-semibold text-center transition-colors border-r last:border-r-0 border-border ${
                 isActive
-                  ? "bg-primary text-white shadow-md"
-                  : "bg-white text-text-secondary border border-border-main hover:border-primary/30"
+                  ? "bg-card text-primary"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-text-muted"}`} />
-              <span className="text-[11px] font-semibold leading-tight">
-                {PLAN_TYPE_LABELS[type]}
-              </span>
+              {PLAN_TYPE_LABELS[type]}
             </button>
           );
         })}
       </div>
 
-      {/* Description */}
-      <div className="bg-secondary rounded-xl px-4 py-3">
-        <p className="text-xs text-primary font-medium">
-          <span className="font-bold">{PLAN_TYPE_LABELS[selected]}</span>이란?
+      {/* Description box */}
+      <div className="mt-4 px-4 py-4 bg-card border border-border rounded-xl">
+        <p className="text-[14px] font-bold text-foreground">
+          {PLAN_TYPE_LABELS[selected]}이란?
         </p>
-        <p className="text-xs text-text-secondary mt-1">
+        <p className="text-[13px] text-text-secondary mt-1.5 leading-relaxed">
           {PLAN_TYPE_DESCRIPTIONS[selected]}
         </p>
       </div>

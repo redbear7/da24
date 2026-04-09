@@ -40,7 +40,6 @@ export default function ConsultationForm({
     if (!name.trim() || !phone.trim()) return;
 
     setIsSubmitting(true);
-
     try {
       const res = await fetch("/api/consultation", {
         method: "POST",
@@ -55,15 +54,13 @@ export default function ConsultationForm({
           memo: memo.trim() || undefined,
         }),
       });
-
       if (!res.ok) throw new Error("Failed");
     } catch {
-      // Fallback: still show success for MVP (offline mode)
+      // Fallback: still show success for MVP
     }
 
     setIsSubmitting(false);
     setIsSuccess(true);
-
     setTimeout(() => {
       setIsSuccess(false);
       onClose();
@@ -76,30 +73,28 @@ export default function ConsultationForm({
 
   if (!isOpen) return null;
 
+  const inputCls =
+    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[14px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative bg-white w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
-        {/* Handle bar (mobile) */}
+      <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
         <div className="flex justify-center pt-3 sm:hidden">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          <div className="w-10 h-1 bg-border rounded-full" />
         </div>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3">
-          <h2 className="text-lg font-bold text-text-primary">무료 상담 신청</h2>
+          <h2 className="text-lg font-bold text-foreground">무료 상담 신청</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
           >
-            <X className="w-5 h-5 text-text-muted" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Selected Info */}
         <div className="mx-5 mb-4 bg-secondary rounded-xl px-4 py-3 flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
@@ -108,7 +103,7 @@ export default function ConsultationForm({
             {providerInfo?.key === "lg" ? "U+" : providerInfo?.name?.charAt(0)}
           </div>
           <div>
-            <p className="text-sm font-bold text-text-primary">
+            <p className="text-sm font-bold text-foreground">
               {providerInfo?.name} · {PLAN_TYPE_LABELS[planType]}
             </p>
             {selectedPlanName && (
@@ -117,84 +112,52 @@ export default function ConsultationForm({
           </div>
         </div>
 
-        {/* Success State */}
         {isSuccess ? (
           <div className="px-5 py-12 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <p className="text-lg font-bold text-text-primary">신청이 완료되었습니다!</p>
+            <p className="text-lg font-bold text-foreground">신청이 완료되었습니다!</p>
             <p className="text-sm text-text-muted mt-2">
               전문 상담사가 곧 연락드릴 예정입니다.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="px-5 pb-8">
-            {/* Name */}
             <label className="block mb-4">
-              <span className="text-sm font-semibold text-text-primary flex items-center gap-1.5 mb-1.5">
-                <User className="w-4 h-4 text-text-muted" />
+              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
+                <User className="w-4 h-4 text-muted-foreground" />
                 이름 <span className="text-accent">*</span>
               </span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="홍길동"
-                required
-                className="w-full px-4 py-3 border border-border-main rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동" required className={inputCls} />
             </label>
 
-            {/* Phone */}
             <label className="block mb-4">
-              <span className="text-sm font-semibold text-text-primary flex items-center gap-1.5 mb-1.5">
-                <Phone className="w-4 h-4 text-text-muted" />
+              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
+                <Phone className="w-4 h-4 text-muted-foreground" />
                 연락처 <span className="text-accent">*</span>
               </span>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="010-1234-5678"
-                required
-                className="w-full px-4 py-3 border border-border-main rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
+              <input type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="010-1234-5678" required className={inputCls} />
             </label>
 
-            {/* Address */}
             <label className="block mb-4">
-              <span className="text-sm font-semibold text-text-primary flex items-center gap-1.5 mb-1.5">
-                <MapPin className="w-4 h-4 text-text-muted" />
+              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
                 설치 주소
               </span>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="서울시 강남구 테헤란로 123"
-                className="w-full px-4 py-3 border border-border-main rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="서울시 강남구 테헤란로 123" className={inputCls} />
             </label>
 
-            {/* Memo */}
             <label className="block mb-6">
-              <span className="text-sm font-semibold text-text-primary flex items-center gap-1.5 mb-1.5">
-                <MessageSquare className="w-4 h-4 text-text-muted" />
+              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
+                <MessageSquare className="w-4 h-4 text-muted-foreground" />
                 요청사항
               </span>
-              <textarea
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="추가 요청사항을 입력해 주세요"
-                rows={3}
-                className="w-full px-4 py-3 border border-border-main rounded-xl text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-              />
+              <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="추가 요청사항을 입력해 주세요" rows={3} className={`${inputCls} resize-none`} />
             </label>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isSubmitting || !name.trim() || !phone.trim()}
-              className="w-full py-4 bg-primary text-white font-bold rounded-xl text-[15px] hover:bg-primary-hover active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

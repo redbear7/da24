@@ -1,78 +1,89 @@
 @import "tailwindcss";
 
+/* ========== Light Mode (default) ========== */
 :root {
-  --bg-surface: #f4f6f9;
-  --bg-card: #ffffff;
-  --bg-primary: #3B6DF5;
-  --bg-primary-hover: #2B5AD9;
-  --bg-secondary: #EEF3FF;
-  --bg-accent: #FF4D4D;
-  --bg-hero: linear-gradient(135deg, #1E3A8A 0%, #3B6DF5 100%);
-
-  --text-primary: #1A1A2E;
+  --background: #FFFFFF;
+  --foreground: #1A1A2E;
+  --muted: #F4F6F9;
+  --muted-foreground: #8D95A7;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A2E;
+  --border: #E5E7EB;
+  --border-subtle: #F0F1F5;
+  --primary: #3B5BDB;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0F4FF;
+  --secondary-foreground: #3B5BDB;
+  --accent: #FF4D4D;
+  --accent-foreground: #FFFFFF;
   --text-secondary: #5A6278;
   --text-muted: #8D95A7;
-  --text-on-primary: #ffffff;
-  --text-accent: #FF4D4D;
-  --text-link: #3B6DF5;
-
-  --border-main: #E2E6EF;
-  --border-subtle: #EFF1F5;
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
-
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
-
-  --provider-kt: #ED1C24;
+  --bottom-bar-bg: #3B5BDB;
+  --bottom-bar-text: #FFFFFF;
+  --provider-kt: #000000;
   --provider-lg: #E6007E;
-  --provider-sk: #FF6200;
+  --provider-sk: #EA002C;
+  --ring: #3B5BDB;
+}
+
+/* ========== Dark Mode ========== */
+.dark {
+  --background: #0F1117;
+  --foreground: #E8EBF0;
+  --muted: #1A1D27;
+  --muted-foreground: #6B7280;
+  --card: #1A1D27;
+  --card-foreground: #E8EBF0;
+  --border: #2A2D37;
+  --border-subtle: #22252F;
+  --primary: #5B7CF7;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1E2235;
+  --secondary-foreground: #7B9CFF;
+  --accent: #FF6B6B;
+  --accent-foreground: #FFFFFF;
+  --text-secondary: #9CA3B0;
+  --text-muted: #6B7280;
+  --bottom-bar-bg: #1E2235;
+  --bottom-bar-text: #FFFFFF;
+  --provider-kt: #FFFFFF;
+  --provider-lg: #FF4DA6;
+  --provider-sk: #FF4D6A;
+  --ring: #5B7CF7;
 }
 
 @theme inline {
-  --color-surface: var(--bg-surface);
-  --color-card: var(--bg-card);
-  --color-primary: var(--bg-primary);
-  --color-primary-hover: var(--bg-primary-hover);
-  --color-secondary: var(--bg-secondary);
-  --color-accent: var(--bg-accent);
-  --color-text-primary: var(--text-primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
-  --color-border-main: var(--border-main);
-  --color-border-subtle: var(--border-subtle);
-  --color-provider-kt: var(--provider-kt);
-  --color-provider-lg: var(--provider-lg);
-  --color-provider-sk: var(--provider-sk);
+  --color-bottom-bar-bg: var(--bottom-bar-bg);
+  --color-bottom-bar-text: var(--bottom-bar-text);
+  --color-ring: var(--ring);
 }
 
 body {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
 }
 
-/* Smooth scroll */
 html { scroll-behavior: smooth; }
+* { -webkit-tap-highlight-color: transparent; }
+::selection { background: var(--primary); color: white; }
 
-/* Mobile touch tap highlight */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Selection */
-::selection {
-  background: var(--bg-primary);
-  color: white;
-}
-
-/* Safe area support for notched phones */
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
