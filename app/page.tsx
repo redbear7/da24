@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import PlanTypeSelector from "@/components/PlanTypeSelector";
@@ -9,23 +9,35 @@ import PlanComparison from "@/components/PlanComparison";
 import PriceDisplay from "@/components/PriceDisplay";
 import ConsultationForm from "@/components/ConsultationForm";
 import Footer from "@/components/Footer";
-import { PlanType, ProviderKey, SAMPLE_PLANS } from "@/lib/types";
+import { Plan, PlanType, ProviderKey } from "@/lib/types";
+import { fetchPlans } from "@/lib/plans";
 import { Phone } from "lucide-react";
 
 export default function InternetPage() {
   const [planType, setPlanType] = useState<PlanType>("new");
   const [provider, setProvider] = useState<ProviderKey>("kt");
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>("kt-2");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [plans, setPlans] = useState<Plan[]>([]);
+
+  useEffect(() => {
+    fetchPlans().then((data) => {
+      setPlans(data);
+      const popular = data.find(
+        (p) => p.providerKey === "kt" && p.planType === "new" && p.isPopular
+      );
+      setSelectedPlanId(popular?.id ?? data.find((p) => p.providerKey === "kt" && p.planType === "new")?.id ?? null);
+    });
+  }, []);
 
   const selectedPlan = useMemo(
-    () => SAMPLE_PLANS.find((p) => p.id === selectedPlanId) || null,
-    [selectedPlanId]
+    () => plans.find((p) => p.id === selectedPlanId) || null,
+    [plans, selectedPlanId]
   );
 
   const handleProviderChange = (p: ProviderKey) => {
     setProvider(p);
-    const popular = SAMPLE_PLANS.find(
+    const popular = plans.find(
       (plan) => plan.providerKey === p && plan.planType === planType && plan.isPopular
     );
     setSelectedPlanId(popular?.id || null);
@@ -33,7 +45,7 @@ export default function InternetPage() {
 
   const handlePlanTypeChange = (t: PlanType) => {
     setPlanType(t);
-    const popular = SAMPLE_PLANS.find(
+    const popular = plans.find(
       (plan) => plan.providerKey === provider && plan.planType === t && plan.isPopular
     );
     setSelectedPlanId(popular?.id || null);
@@ -48,7 +60,7 @@ export default function InternetPage() {
       <ProviderSelector selected={provider} onChange={handleProviderChange} />
 
       <PlanComparison
-        plans={SAMPLE_PLANS}
+        plans={plans}
         provider={provider}
         planType={planType}
         selectedPlan={selectedPlanId}
