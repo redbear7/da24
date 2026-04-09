@@ -7,20 +7,40 @@ interface Props {
   onChange: (provider: ProviderKey) => void;
 }
 
-/* Original da24 uses large text logos, not SVG images — replicate that style */
-const LOGO_TEXT: Record<ProviderKey, { text: string; style: string }> = {
-  kt: { text: "kt", style: "font-[800] text-[28px] tracking-tight" },
-  lg: { text: "U+", style: "font-[800] text-[28px] tracking-tight" },
-  sk: { text: "SK", style: "font-[700] text-[26px] tracking-tight italic" },
-  other: { text: "알뜰 인터넷", style: "font-[600] text-[14px]" },
-};
-
-/* 다크모드 대응 CSS 변수 사용: --provider-kt/lg/sk */
-const LOGO_COLOR_VAR: Record<ProviderKey, string> = {
-  kt: "var(--provider-kt)",
-  lg: "var(--provider-lg)",
-  sk: "var(--provider-sk)",
-  other: "var(--muted-foreground)",
+/* KT logo: "kt" 검정 텍스트 + 빨간 빗금 느낌 → 검정 기본
+   U+: 마젠타/보라 계열
+   SK: 빨강 텍스트 + 오렌지 날개 (텍스트로는 빨강)
+   알뜰 인터넷: 회색 */
+const LOGO_CONFIG: Record<ProviderKey, {
+  text: string;
+  style: string;
+  color: string;         // 활성 색상
+  inactiveColor: string; // 비활성 색상
+}> = {
+  kt: {
+    text: "kt",
+    style: "font-[800] text-[30px] tracking-tight",
+    color: "#000000",
+    inactiveColor: "#C0C0C0",
+  },
+  lg: {
+    text: "U+",
+    style: "font-[800] text-[30px] tracking-tight",
+    color: "#6B1A8A",
+    inactiveColor: "#C0B0D0",
+  },
+  sk: {
+    text: "SK",
+    style: "font-[700] text-[28px] tracking-tight",
+    color: "#EA002C",
+    inactiveColor: "#E0B0B0",
+  },
+  other: {
+    text: "알뜰 인터넷",
+    style: "font-[600] text-[14px]",
+    color: "#5A6278",
+    inactiveColor: "#C0C5D0",
+  },
 };
 
 export default function ProviderSelector({ selected, onChange }: Props) {
@@ -31,24 +51,22 @@ export default function ProviderSelector({ selected, onChange }: Props) {
       <div className="grid grid-cols-4 gap-3">
         {PROVIDERS.map((provider) => {
           const isActive = selected === provider.key;
-          const logo = LOGO_TEXT[provider.key];
+          const cfg = LOGO_CONFIG[provider.key];
           return (
             <button
               key={provider.key}
               onClick={() => onChange(provider.key)}
-              className={`flex items-center justify-center h-[72px] rounded-xl border-2 transition-all ${
+              className={`flex items-center justify-center h-[80px] rounded-2xl border-2 transition-all ${
                 isActive
-                  ? "border-primary bg-card shadow-sm"
-                  : "border-border bg-card hover:border-border-subtle"
+                  ? "border-primary bg-secondary/50 shadow-sm"
+                  : "border-border bg-card hover:border-primary/20"
               }`}
             >
               <span
-                className={`${logo.style} transition-colors ${
-                  isActive ? "" : "opacity-40"
-                }`}
-                style={{ color: isActive ? LOGO_COLOR_VAR[provider.key] : undefined }}
+                className={cfg.style}
+                style={{ color: isActive ? cfg.color : cfg.inactiveColor }}
               >
-                {logo.text}
+                {cfg.text}
               </span>
             </button>
           );
