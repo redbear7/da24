@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --bg-surface: #f4f6f9;
+  --bg-card: #ffffff;
+  --bg-primary: #3B6DF5;
+  --bg-primary-hover: #2B5AD9;
+  --bg-secondary: #F0F4FF;
+  --bg-accent: #FF4D4D;
+  --bg-hero: linear-gradient(135deg, #1E3A8A 0%, #3B6DF5 100%);
+
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A6278;
+  --text-muted: #8D95A7;
+  --text-on-primary: #ffffff;
+  --text-accent: #FF4D4D;
+  --text-link: #3B6DF5;
+
+  --border-main: #E2E6EF;
+  --border-subtle: #EFF1F5;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+
+  --provider-kt: #ED1C24;
+  --provider-lg: #E6007E;
+  --provider-sk: #FF6200;
+}
+
+@theme inline {
+  --color-surface: var(--bg-surface);
+  --color-card: var(--bg-card);
+  --color-primary: var(--bg-primary);
+  --color-primary-hover: var(--bg-primary-hover);
+  --color-secondary: var(--bg-secondary);
+  --color-accent: var(--bg-accent);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border-main: var(--border-main);
+  --color-border-subtle: var(--border-subtle);
+  --color-provider-kt: var(--provider-kt);
+  --color-provider-lg: var(--provider-lg);
+  --color-provider-sk: var(--provider-sk);
+}
+
+body {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* Selection */
+::selection {
+  background: var(--bg-primary);
+  color: white;
+}
