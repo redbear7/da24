@@ -6,6 +6,10 @@ import HeroSection from "@/components/HeroSection";
 import PlanTypeSelector from "@/components/PlanTypeSelector";
 import ProviderSelector from "@/components/ProviderSelector";
 import PlanComparison from "@/components/PlanComparison";
+import CtaCards from "@/components/CtaCards";
+import ConsultationAgent from "@/components/ConsultationAgent";
+import Benefits from "@/components/Benefits";
+import CustomerReviews from "@/components/CustomerReviews";
 import BottomBar from "@/components/BottomBar";
 import ConsultationForm from "@/components/ConsultationForm";
 import Footer from "@/components/Footer";
@@ -95,6 +99,34 @@ export default function InternetPage() {
         selectedPlan={selectedPlanId}
         onSelectPlan={setSelectedPlanId}
       />
+
+      {/* Divider */}
+      <div className="max-w-[640px] mx-auto px-5 pt-4">
+        <hr className="border-border" />
+      </div>
+
+      <CtaCards />
+
+      {/* Divider */}
+      <div className="max-w-[640px] mx-auto px-5">
+        <hr className="border-border" />
+      </div>
+
+      <ConsultationAgent />
+
+      {/* Divider */}
+      <div className="max-w-[640px] mx-auto px-5">
+        <hr className="border-border" />
+      </div>
+
+      <Benefits />
+
+      {/* Divider */}
+      <div className="max-w-[640px] mx-auto px-5 pt-4">
+        <hr className="border-border" />
+      </div>
+
+      <CustomerReviews />
 
       <Footer />
 
