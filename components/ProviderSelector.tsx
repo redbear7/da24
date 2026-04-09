@@ -15,6 +15,14 @@ const LOGO_TEXT: Record<ProviderKey, { text: string; style: string }> = {
   other: { text: "알뜰 인터넷", style: "font-[600] text-[14px]" },
 };
 
+/* 다크모드 대응 CSS 변수 사용: --provider-kt/lg/sk */
+const LOGO_COLOR_VAR: Record<ProviderKey, string> = {
+  kt: "var(--provider-kt)",
+  lg: "var(--provider-lg)",
+  sk: "var(--provider-sk)",
+  other: "var(--muted-foreground)",
+};
+
 export default function ProviderSelector({ selected, onChange }: Props) {
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
@@ -38,7 +46,7 @@ export default function ProviderSelector({ selected, onChange }: Props) {
                 className={`${logo.style} transition-colors ${
                   isActive ? "" : "opacity-40"
                 }`}
-                style={{ color: isActive ? provider.color : undefined }}
+                style={{ color: isActive ? LOGO_COLOR_VAR[provider.key] : undefined }}
               >
                 {logo.text}
               </span>

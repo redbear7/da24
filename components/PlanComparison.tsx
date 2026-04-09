@@ -1,6 +1,13 @@
 "use client";
 
 import { Plan, ProviderKey, PlanType, PROVIDERS } from "@/lib/types";
+
+const PROVIDER_COLOR_VAR: Record<ProviderKey, string> = {
+  kt: "var(--provider-kt)",
+  lg: "var(--provider-lg)",
+  sk: "var(--provider-sk)",
+  other: "var(--muted-foreground)",
+};
 import { Zap, Check, Star } from "lucide-react";
 
 interface Props {
@@ -43,7 +50,7 @@ export default function PlanComparison({
     <section className="max-w-[640px] mx-auto px-5 py-4">
       <h2 className="text-[16px] font-bold text-foreground mb-1">요금제 비교</h2>
       <p className="text-[13px] text-text-muted mb-4">
-        <span style={{ color: providerInfo?.color }} className="font-bold">
+        <span style={{ color: providerInfo ? PROVIDER_COLOR_VAR[providerInfo.key] : undefined }} className="font-bold">
           {providerInfo?.name}
         </span>{" "}
         요금제를 비교해 보세요
