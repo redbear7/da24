@@ -32,7 +32,7 @@ export default function ColorModeToggle() {
         <button
           key={key}
           onClick={() => handleChange(key)}
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-semibold transition-all ${
+          className={`flex items-center gap-1 px-3 py-2 rounded-full text-[13px] font-semibold transition-all min-h-[44px] ${
             mode === key
               ? "bg-white shadow-sm text-foreground"
               : "text-muted-foreground hover:text-foreground"

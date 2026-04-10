@@ -22,11 +22,11 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
           <ColorModeToggle />
-          <Link href="/chat" className="flex items-center gap-1.5 px-3.5 py-2 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
+          <Link href="/chat" className="flex items-center gap-1.5 px-3.5 py-2.5 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors min-h-[44px]">
             <MessageCircle className="w-3.5 h-3.5" />
             채팅내역
           </Link>
-          <Link href="/history" className="flex items-center gap-1.5 px-3.5 py-2 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors">
+          <Link href="/history" className="flex items-center gap-1.5 px-3.5 py-2.5 text-[14px] font-medium text-primary border border-primary/30 rounded-full hover:bg-secondary transition-colors min-h-[44px]">
             <ClipboardList className="w-3.5 h-3.5" />
             내 신청내역
           </Link>
