@@ -11,7 +11,6 @@ import {
   MessageSquare,
   Loader2,
   CheckCircle,
-  ChevronDown,
   Sparkles,
   Shield,
   Clock,
@@ -22,13 +21,21 @@ import {
 // Types & Constants
 // ─────────────────────────────────────────────
 
-type CleanType = "movein" | "moving" | "regular";
+type CleanType = "movein" | "moving" | "regular" | "partial";
 
 const CLEAN_TYPES: { key: CleanType; label: string; desc: string }[] = [
   { key: "movein", label: "입주청소", desc: "새 집 입주 전 전체 청소" },
   { key: "moving", label: "이사청소", desc: "이사 후 기존 거주지 청소" },
   { key: "regular", label: "거주청소", desc: "생활공간 정기 청소" },
+  { key: "partial", label: "부분청소", desc: "주방·화장실 부분 청소" },
 ];
+
+const CLEAN_TYPE_DESCRIPTIONS: Record<CleanType, string> = {
+  movein: "입주 전 새 집을 처음부터 끝까지 꼼꼼하게 청소합니다. 화장실·주방·베란다 포함 전체 청소로 완벽하게 준비해 드립니다.",
+  moving: "이사 후 비워진 기존 거주지를 깨끗하게 청소합니다. 보증금 반환에 유리하도록 원상복구 수준으로 청소해 드립니다.",
+  regular: "생활하는 공간을 정기적으로 청소해 드립니다. 바닥·욕실·주방 청소 등 쾌적한 생활환경을 유지합니다.",
+  partial: "주방·화장실·베란다 등 특정 공간만 집중적으로 청소합니다. 필요한 부분만 선택해 합리적인 가격으로 이용하세요.",
+};
 
 const SIZE_OPTIONS = [
   "10평 이하",
@@ -48,15 +55,50 @@ const PRICE_TABLE: Record<CleanType, number[]> = {
   movein:  [120000, 160000, 200000, 250000, 300000, 380000, 450000, 0],
   moving:  [100000, 130000, 160000, 200000, 240000, 300000, 360000, 0],
   regular: [70000,  90000,  110000, 140000, 170000, 210000, 260000, 0],
+  partial: [50000,  65000,   80000, 100000, 120000, 150000, 180000, 0],
 };
 
 function getEstimatedPrice(type: CleanType, sizeIdx: number | null): number | null {
   if (sizeIdx === null) return null;
-  return PRICE_TABLE[type][sizeIdx] || null; // 0 = 협의
+  return PRICE_TABLE[type][sizeIdx] || null;
 }
 
 // ─────────────────────────────────────────────
-// Sub-components
+// Hero Section
+// ─────────────────────────────────────────────
+
+function CleanHeroSection() {
+  return (
+    <section className="max-w-[640px] mx-auto px-5 pt-8 pb-6">
+      <p className="text-[13px] font-semibold text-primary mb-2">
+        입주청소 · 이사청소 · 거주청소 · 부분청소
+      </p>
+      <h1 className="text-[24px] font-bold text-foreground leading-snug mb-2">
+        새 집처럼 깨끗하게,<br />
+        <span className="text-primary">다이사 청소 서비스</span>
+      </h1>
+      <p className="text-[14px] text-text-secondary leading-relaxed mb-4">
+        경력 3년 이상 전문 청소팀이 직접 방문합니다.<br />
+        유형과 평수를 선택하면 예상 견적을 바로 확인하세요.
+      </p>
+
+      {/* Trust badges */}
+      <div className="flex gap-2 flex-wrap">
+        {["누적 청소 12,000건+", "당일 예약 가능", "만족 보장"].map((badge) => (
+          <span
+            key={badge}
+            className="text-[12px] font-medium text-primary bg-secondary px-3 py-1 rounded-full"
+          >
+            {badge}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Clean Type Selector (4 types, 2×2 grid)
 // ─────────────────────────────────────────────
 
 function CleanTypeSelector({
@@ -67,29 +109,49 @@ function CleanTypeSelector({
   onChange: (t: CleanType) => void;
 }) {
   return (
-    <section className="max-w-[640px] mx-auto px-5 pt-6 pb-4">
+    <section className="max-w-[640px] mx-auto px-5 pt-4 pb-4">
       <h2 className="text-[16px] font-bold text-foreground mb-3">청소 유형 선택</h2>
-      <div className="grid grid-cols-3 border border-border rounded-xl overflow-hidden">
-        {CLEAN_TYPES.map((t, i) => (
-          <button
-            key={t.key}
-            onClick={() => onChange(t.key)}
-            className={[
-              "py-3 text-center transition-colors",
-              i > 0 ? "border-l border-border" : "",
-              selected === t.key
-                ? "bg-card text-primary font-semibold"
-                : "bg-muted text-muted-foreground",
-            ].join(" ")}
-          >
-            <span className="block text-[14px]">{t.label}</span>
-            <span className="block text-[11px] mt-0.5 opacity-70">{t.desc}</span>
-          </button>
-        ))}
+      <div className="grid grid-cols-2 gap-2">
+        {CLEAN_TYPES.map((t) => {
+          const isActive = selected === t.key;
+          return (
+            <button
+              key={t.key}
+              onClick={() => onChange(t.key)}
+              className={[
+                "py-3.5 px-4 rounded-xl border-2 text-left transition-all",
+                isActive
+                  ? "border-primary bg-secondary"
+                  : "border-border bg-card hover:border-primary/40",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "block text-[15px] font-bold mb-0.5",
+                  isActive ? "text-primary" : "text-foreground",
+                ].join(" ")}
+              >
+                {t.label}
+              </span>
+              <span className="block text-[12px] text-text-secondary">{t.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Description */}
+      <div className="mt-3 px-4 py-3 bg-muted rounded-xl">
+        <p className="text-[13px] text-text-secondary leading-relaxed">
+          {CLEAN_TYPE_DESCRIPTIONS[selected]}
+        </p>
       </div>
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Size & Room Selector
+// ─────────────────────────────────────────────
 
 function SizeRoomSelector({
   selectedSize,
@@ -115,7 +177,7 @@ function SizeRoomSelector({
               key={s}
               onClick={() => onSizeChange(i)}
               className={[
-                "py-2.5 rounded-xl border text-[13px] font-medium transition-all",
+                "py-3 rounded-xl border-2 text-[12px] font-medium transition-all text-center leading-tight",
                 selectedSize === i
                   ? "border-primary bg-secondary text-primary"
                   : "border-border bg-card text-foreground hover:border-primary/40",
@@ -136,7 +198,7 @@ function SizeRoomSelector({
               key={r}
               onClick={() => onRoomChange(i)}
               className={[
-                "py-2.5 rounded-xl border text-[12px] font-medium transition-all",
+                "py-3 rounded-xl border-2 text-[11px] font-medium transition-all text-center leading-tight",
                 selectedRoom === i
                   ? "border-primary bg-secondary text-primary"
                   : "border-border bg-card text-foreground hover:border-primary/40",
@@ -150,6 +212,10 @@ function SizeRoomSelector({
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Date Selector
+// ─────────────────────────────────────────────
 
 function DateSelector({
   selectedDate,
@@ -169,17 +235,24 @@ function DateSelector({
           value={selectedDate}
           min={today}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-3.5 bg-card border border-border rounded-xl text-[15px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all"
+          className="w-full pl-10 pr-4 py-4 bg-card border-2 border-border rounded-xl text-[15px] text-foreground focus:outline-none focus:border-primary transition-all"
         />
       </div>
       {selectedDate && (
         <p className="text-[13px] text-text-secondary mt-2 ml-1">
-          선택하신 날짜: <span className="font-semibold text-primary">{selectedDate.replace(/-/g, ".")}</span>
+          선택하신 날짜:{" "}
+          <span className="font-semibold text-primary">
+            {selectedDate.replace(/-/g, ".")}
+          </span>
         </p>
       )}
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Price Estimate Box
+// ─────────────────────────────────────────────
 
 function PriceEstimateBox({
   cleanType,
@@ -194,8 +267,10 @@ function PriceEstimateBox({
   if (sizeIdx === null) {
     return (
       <section className="max-w-[640px] mx-auto px-5 pb-6">
-        <div className="bg-secondary rounded-xl px-5 py-4 text-center">
-          <p className="text-[14px] text-text-secondary">평수를 선택하면 예상 견적을 안내해 드려요</p>
+        <div className="bg-secondary rounded-xl px-5 py-5 text-center border border-primary/10">
+          <p className="text-[14px] text-text-secondary">
+            평수를 선택하면 예상 견적을 안내해 드려요
+          </p>
         </div>
       </section>
     );
@@ -203,29 +278,35 @@ function PriceEstimateBox({
 
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
-      <div className="bg-secondary rounded-xl px-5 py-4">
+      <div className="bg-secondary rounded-xl px-5 py-4 border border-primary/10">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[14px] text-text-secondary">{typeName} · {SIZE_OPTIONS[sizeIdx]}</span>
+          <span className="text-[13px] text-text-secondary">
+            {typeName} · {SIZE_OPTIONS[sizeIdx]}
+          </span>
           <span className="text-[11px] text-text-muted">VAT 포함</span>
         </div>
         {price ? (
-          <div className="flex items-end gap-1.5 mt-1">
-            <span className="text-[11px] text-text-muted">예상 견적</span>
-            <span className="text-[26px] font-extrabold text-primary leading-none">
+          <div className="flex items-end gap-1.5 mt-2">
+            <span className="text-[12px] text-text-muted">예상 견적</span>
+            <span className="text-[28px] font-extrabold text-primary leading-none">
               {price.toLocaleString()}
             </span>
             <span className="text-[15px] font-semibold text-foreground mb-0.5">원~</span>
           </div>
         ) : (
-          <p className="text-[18px] font-bold text-primary mt-1">견적 문의 (51평 이상)</p>
+          <p className="text-[20px] font-bold text-primary mt-2">견적 문의 (51평 이상)</p>
         )}
         <p className="text-[11px] text-text-muted mt-2">
-          * 실제 요금은 상태에 따라 달라질 수 있으며, 현장 확인 후 최종 안내드립니다.
+          * 실제 요금은 오염도·청소 범위에 따라 달라질 수 있으며, 현장 확인 후 최종 안내드립니다.
         </p>
       </div>
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Price Guide Table
+// ─────────────────────────────────────────────
 
 function PriceGuideSection({ cleanType }: { cleanType: CleanType }) {
   const prices = PRICE_TABLE[cleanType];
@@ -236,12 +317,14 @@ function PriceGuideSection({ cleanType }: { cleanType: CleanType }) {
       <h2 className="text-[16px] font-bold text-foreground mb-3">가격 안내</h2>
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-4 py-3 bg-muted border-b border-border">
-          <p className="text-[13px] font-semibold text-text-secondary">{typeName} 기준 요금표 (VAT 포함)</p>
+          <p className="text-[13px] font-semibold text-text-secondary">
+            {typeName} 기준 요금표 (VAT 포함)
+          </p>
         </div>
         {SIZE_OPTIONS.map((size, i) => (
           <div
             key={size}
-            className="flex items-center justify-between px-4 py-3 border-b border-border-subtle last:border-b-0"
+            className="flex items-center justify-between px-4 py-3.5 border-b border-border-subtle last:border-b-0"
           >
             <span className="text-[14px] text-foreground">{size}</span>
             <span className="text-[14px] font-semibold text-foreground">
@@ -256,6 +339,10 @@ function PriceGuideSection({ cleanType }: { cleanType: CleanType }) {
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Benefits
+// ─────────────────────────────────────────────
 
 function BenefitsSection() {
   const items = [
@@ -282,19 +369,32 @@ function BenefitsSection() {
   ];
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
-      <h2 className="text-[16px] font-bold text-foreground mb-3">다이사 청소 서비스 혜택</h2>
+      <h2 className="text-[16px] font-bold text-foreground mb-3">
+        다이사 청소 서비스 혜택
+      </h2>
       <div className="grid grid-cols-2 gap-3">
         {items.map((item) => (
-          <div key={item.title} className="bg-card border border-border rounded-xl p-4">
+          <div
+            key={item.title}
+            className="bg-card border border-border rounded-xl p-4"
+          >
             <div className="mb-2">{item.icon}</div>
-            <p className="text-[14px] font-semibold text-foreground mb-1">{item.title}</p>
-            <p className="text-[12px] text-text-secondary leading-relaxed">{item.desc}</p>
+            <p className="text-[14px] font-semibold text-foreground mb-1">
+              {item.title}
+            </p>
+            <p className="text-[12px] text-text-secondary leading-relaxed">
+              {item.desc}
+            </p>
           </div>
         ))}
       </div>
     </section>
   );
 }
+
+// ─────────────────────────────────────────────
+// Reviews
+// ─────────────────────────────────────────────
 
 function ReviewsSection() {
   const reviews = [
@@ -326,10 +426,15 @@ function ReviewsSection() {
       <h2 className="text-[16px] font-bold text-foreground mb-3">고객 후기</h2>
       <div className="space-y-3">
         {reviews.map((r) => (
-          <div key={r.name + r.date} className="bg-card border border-border rounded-xl p-4">
+          <div
+            key={r.name + r.date}
+            className="bg-card border border-border rounded-xl p-4"
+          >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-semibold text-foreground">{r.name}</span>
+                <span className="text-[14px] font-semibold text-foreground">
+                  {r.name}
+                </span>
                 <span className="text-[12px] bg-secondary text-primary px-2 py-0.5 rounded-full font-medium">
                   {r.type}
                 </span>
@@ -340,11 +445,17 @@ function ReviewsSection() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3.5 h-3.5 ${i < r.score ? "text-yellow-400 fill-yellow-400" : "text-border"}`}
+                  className={`w-3.5 h-3.5 ${
+                    i < r.score
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-border"
+                  }`}
                 />
               ))}
             </div>
-            <p className="text-[13px] text-text-secondary leading-relaxed">{r.body}</p>
+            <p className="text-[13px] text-text-secondary leading-relaxed">
+              {r.body}
+            </p>
           </div>
         ))}
       </div>
@@ -369,9 +480,13 @@ function CleanBottomBar({
         <div className="flex items-center justify-between mb-3">
           <span className="text-[14px] text-bottom-bar-text/70">예상 견적</span>
           {price === null ? (
-            <span className="text-[16px] font-bold text-bottom-bar-text/60">평수를 선택해 주세요</span>
+            <span className="text-[15px] font-semibold text-bottom-bar-text/60">
+              평수를 선택해 주세요
+            </span>
           ) : price === "inquiry" ? (
-            <span className="text-[20px] font-extrabold text-bottom-bar-text">견적 문의</span>
+            <span className="text-[20px] font-extrabold text-bottom-bar-text">
+              견적 문의
+            </span>
           ) : (
             <span className="text-[20px] font-extrabold text-bottom-bar-text">
               {price.toLocaleString()}원 ~
@@ -461,11 +576,14 @@ function CleanConsultationForm({
   if (!isOpen) return null;
 
   const inputCls =
-    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
+    "w-full px-4 py-3.5 bg-card border-2 border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
         <div className="flex justify-center pt-3 sm:hidden">
           <div className="w-10 h-1 bg-border rounded-full" />
@@ -481,7 +599,7 @@ function CleanConsultationForm({
         </div>
 
         {/* Selected info summary */}
-        <div className="mx-5 mb-4 bg-secondary rounded-xl px-4 py-3">
+        <div className="mx-5 mb-4 bg-secondary rounded-xl px-4 py-3 border border-primary/10">
           <p className="text-[13px] font-semibold text-primary mb-1">{typeName}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-text-secondary">
             {size && <span>· {size}</span>}
@@ -494,7 +612,9 @@ function CleanConsultationForm({
           <div className="px-5 py-12 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <p className="text-lg font-bold text-foreground">신청이 완료되었습니다!</p>
-            <p className="text-sm text-text-muted mt-2">전문 상담사가 곧 연락드릴 예정입니다.</p>
+            <p className="text-sm text-text-muted mt-2">
+              전문 상담사가 곧 연락드릴 예정입니다.
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="px-5 pb-8">
@@ -582,25 +702,6 @@ function CleanConsultationForm({
 }
 
 // ─────────────────────────────────────────────
-// Hero Section
-// ─────────────────────────────────────────────
-
-function CleanHeroSection() {
-  return (
-    <section className="max-w-[640px] mx-auto px-5 pt-6 pb-5">
-      <p className="text-[13px] font-semibold text-primary mb-2">입주청소 · 이사청소 · 거주청소</p>
-      <h1 className="text-[24px] font-bold text-foreground leading-snug mb-2">
-        새 집처럼 깨끗하게,<br />
-        <span className="text-primary">다이사 청소 서비스</span>
-      </h1>
-      <p className="text-[14px] text-text-secondary leading-relaxed">
-        전문 청소팀이 꼼꼼하게 청소해 드립니다. 평수와 유형을 선택하면 예상 견적을 바로 안내해 드려요.
-      </p>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────
 
@@ -619,16 +720,22 @@ export default function CleanPage() {
       ? "inquiry"
       : estimatedPrice;
 
+  const handleTypeChange = (t: CleanType) => {
+    setCleanType(t);
+    setSelectedSize(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
       <CleanHeroSection />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
       </div>
 
-      <CleanTypeSelector selected={cleanType} onChange={(t) => { setCleanType(t); setSelectedSize(null); }} />
+      <CleanTypeSelector selected={cleanType} onChange={handleTypeChange} />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
@@ -685,7 +792,10 @@ export default function CleanPage() {
 
       <Footer />
 
-      <CleanBottomBar onConsultClick={() => setIsFormOpen(true)} price={bottomPrice} />
+      <CleanBottomBar
+        onConsultClick={() => setIsFormOpen(true)}
+        price={bottomPrice}
+      />
 
       <CleanConsultationForm
         isOpen={isFormOpen}

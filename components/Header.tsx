@@ -7,7 +7,7 @@ import ColorModeToggle from "./ColorModeToggle";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-border">
+    <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="max-w-[640px] mx-auto flex items-center justify-between px-5 h-16">
         <Link href="/">
           <Image
