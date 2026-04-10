@@ -87,16 +87,25 @@ export default function InternetPage() {
       <PlanTypeSelector selected={planType} onChange={handlePlanTypeChange} />
 
       {planType === "move" ? (
-        /* 이전 설치: 고객센터 안내만 + Footer */
+        /* 이전 설치: 트럭 일러스트 + 안내 카드 + Footer */
         <>
           <section className="max-w-[640px] mx-auto px-5 pb-6">
+            {/* 트럭 일러스트 카드 */}
+            <div className="bg-secondary rounded-xl p-5 mb-3 flex items-center gap-4">
+              <div className="text-[56px] leading-none shrink-0">🚚</div>
+              <div>
+                <h3 className="text-[16px] font-bold text-foreground mb-1">이사하셨나요?</h3>
+                <p className="text-[13px] text-text-secondary leading-relaxed">
+                  이전 설치는 기존 통신사 그대로<br />
+                  새 주소로 옮기는 서비스예요.
+                </p>
+              </div>
+            </div>
+
+            {/* 고객센터 안내 */}
             <div className="bg-muted rounded-xl p-5">
-              <h3 className="text-[16px] font-bold text-foreground mb-2">이전 설치란?</h3>
-              <p className="text-[14px] text-text-secondary leading-relaxed mb-2">
-                기존에 사용하던 인터넷 서비스를 다른 장소로 이전하는 거예요.
-              </p>
-              <p className="text-[14px] text-accent font-medium mb-4">
-                *이전설치의 경우 통신사 고객센터로 직접 신청해 주세요.
+              <p className="text-[14px] text-accent font-medium mb-3">
+                *이전설치는 통신사 고객센터로 직접 신청해 주세요.
               </p>
               <div className="space-y-1.5 text-[14px] text-foreground">
                 <p>KT 고객센터: 국번 없이 <a href="tel:100" className="font-bold text-primary">100</a></p>

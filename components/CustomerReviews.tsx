@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Star, ChevronDown } from "lucide-react";
+import { Star } from "lucide-react";
 
 interface Review {
   name: string;
@@ -28,7 +27,7 @@ const REVIEWS: Review[] = [
     subsidy: "480,000원 + 비밀지원금",
     rating: 5,
     content:
-      "별 기대 안하고 했는데, 상담사분이 너무 친절해서 만족스러웠어요. 다이사 인터넷 추천합니다 ㅋ 상담해주신 분 감사합니다.!",
+      "별 기대 안하고 했는데, 상담사분이 너무 친절해서 만족스러웠어요. 다이사 인터넷 추천합니다 ㅋ",
     tags: ["빠른 응대", "친절한 상담", "자세한 상담", "높은 사은품 가격"],
   },
   {
@@ -45,7 +44,7 @@ const REVIEWS: Review[] = [
     subsidy: "480,000원 + 비밀지원금",
     rating: 4,
     content:
-      "긴 시간을 두고 천천히 생각할 수 있게끔 해주어 좋았음. 향후 알뜰 인터넷 가입이 가능하게끔 진행해주셨으면 함",
+      "긴 시간을 두고 천천히 생각할 수 있게끔 해주어 좋았음.",
     tags: ["자세한 상담"],
   },
   {
@@ -58,8 +57,6 @@ const REVIEWS: Review[] = [
     tags: ["친절한 상담", "높은 사은품 가격"],
   },
 ];
-
-const INITIAL_VISIBLE = 3;
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -77,34 +74,35 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function CustomerReviews() {
-  const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? REVIEWS : REVIEWS.slice(0, INITIAL_VISIBLE);
-
   return (
-    <section className="max-w-[640px] mx-auto px-5 py-6">
-      <h2 className="text-[18px] font-bold text-foreground mb-4">고객 후기</h2>
+    <section className="max-w-[640px] mx-auto py-6">
+      <h2 className="text-[18px] font-bold text-foreground mb-4 px-5">고객 후기</h2>
 
-      <div className="flex flex-col divide-y divide-border">
-        {visible.map((r, i) => (
-          <div key={i} className="py-4 first:pt-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[15px] font-semibold text-foreground">{r.name}</span>
-              <span className="text-[12px] text-text-muted">{r.date}</span>
+      {/* 가로 스크롤 카드 */}
+      <div className="flex gap-3 overflow-x-auto px-5 pb-3 scrollbar-none"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {REVIEWS.map((r, i) => (
+          <div
+            key={i}
+            className="flex-none w-[240px] bg-card border border-border rounded-xl p-4"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[14px] font-semibold text-foreground">{r.name}</span>
+              <span className="text-[11px] text-text-muted">{r.date}</span>
             </div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <StarRating rating={r.rating} />
-            </div>
-            <p className="text-[13px] font-semibold text-primary mb-1.5">
+            <StarRating rating={r.rating} />
+            <p className="text-[12px] font-semibold text-primary mt-2 mb-1.5">
               지원금: {r.subsidy}
             </p>
-            <p className="text-[14px] text-text-secondary leading-relaxed mb-2">
+            <p className="text-[13px] text-text-secondary leading-relaxed mb-2 line-clamp-3">
               {r.content}
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1">
               {r.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[12px] text-text-muted bg-muted px-2 py-0.5 rounded-md"
+                  className="text-[11px] text-text-muted bg-muted px-1.5 py-0.5 rounded-md"
                 >
                   {tag}
                 </span>
@@ -113,16 +111,6 @@ export default function CustomerReviews() {
           </div>
         ))}
       </div>
-
-      {!showAll && REVIEWS.length > INITIAL_VISIBLE && (
-        <button
-          onClick={() => setShowAll(true)}
-          className="w-full flex items-center justify-center gap-1 mt-2 py-3 text-[14px] text-text-secondary border border-border rounded-xl transition-colors hover:border-primary/40"
-        >
-          고객 후기 더보기
-          <ChevronDown className="w-4 h-4" />
-        </button>
-      )}
     </section>
   );
 }

@@ -19,19 +19,19 @@ const LOGO_CONFIG: Record<ProviderKey, {
 }> = {
   kt: {
     text: "kt",
-    style: "font-[800] text-[30px] tracking-tight",
+    style: "font-[800] text-[28px] tracking-tight",
     color: "#000000",
     inactiveColor: "#C0C0C0",
   },
   lg: {
     text: "U+",
-    style: "font-[800] text-[30px] tracking-tight",
-    color: "#6B1A8A",
-    inactiveColor: "#C0B0D0",
+    style: "font-[800] text-[28px] tracking-tight",
+    color: "#E6007E",
+    inactiveColor: "#E0B0D0",
   },
   sk: {
     text: "SK",
-    style: "font-[700] text-[28px] tracking-tight",
+    style: "font-[700] text-[26px] italic tracking-tight",
     color: "#EA002C",
     inactiveColor: "#E0B0B0",
   },
