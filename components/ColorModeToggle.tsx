@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-type ColorMode = "blue" | "airbnb" | "replicate";
+type ColorMode = "blue" | "red";
 
 const MODES: { key: ColorMode; label: string; color: string }[] = [
   { key: "blue", label: "블루", color: "#2640E6" },
-  { key: "airbnb", label: "Airbnb", color: "#FF385C" },
-  { key: "replicate", label: "Replicate", color: "#EA2804" },
+  { key: "red", label: "레드", color: "#EA2804" },
 ];
 
 export default function ColorModeToggle() {
@@ -18,7 +17,6 @@ export default function ColorModeToggle() {
     if (saved && MODES.some((m) => m.key === saved)) {
       setMode(saved);
     }
-    // 항상 attribute 설정 (기본값 blue 포함)
     document.documentElement.setAttribute("data-color-mode", saved || "blue");
   }, []);
 
@@ -34,7 +32,7 @@ export default function ColorModeToggle() {
         <button
           key={key}
           onClick={() => handleChange(key)}
-          className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-semibold transition-all ${
             mode === key
               ? "bg-white shadow-sm text-foreground"
               : "text-muted-foreground hover:text-foreground"

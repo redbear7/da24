@@ -26,34 +26,8 @@
   --ring: #2640E6;
 }
 
-/* ========== Airbnb 모드 ========== */
-[data-color-mode="airbnb"] {
-  --background: #FFFFFF;
-  --foreground: #222222;
-  --muted: #F7F7F7;
-  --muted-foreground: #717171;
-  --card: #FFFFFF;
-  --card-foreground: #222222;
-  --border: #DDDDDD;
-  --border-subtle: #EBEBEB;
-  --primary: #FF385C;
-  --primary-foreground: #FFFFFF;
-  --secondary: #FFF0F3;
-  --secondary-foreground: #FF385C;
-  --accent: #FF385C;
-  --accent-foreground: #FFFFFF;
-  --text-secondary: #6A6A6A;
-  --text-muted: #717171;
-  --bottom-bar-bg: #222222;
-  --bottom-bar-text: #FFFFFF;
-  --provider-kt: #000000;
-  --provider-lg: #E6007E;
-  --provider-sk: #EA002C;
-  --ring: #FF385C;
-}
-
-/* ========== Replicate 모드 ========== */
-[data-color-mode="replicate"] {
+/* ========== 레드모드 ========== */
+[data-color-mode="red"] {
   --background: #FFFFFF;
   --foreground: #202020;
   --muted: #F5F5F5;
