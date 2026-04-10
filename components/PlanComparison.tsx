@@ -30,6 +30,11 @@ export default function PlanComparison({
   );
   const providerInfo = PROVIDERS.find((p) => p.key === provider);
 
+  // 지원금 최대 플랜 ID
+  const maxSubsidyId = filtered.length > 0
+    ? filtered.reduce((a, b) => (a.subsidy >= b.subsidy ? a : b)).id
+    : null;
+
   if (provider === "other" || filtered.length === 0) {
     return (
       <section className="max-w-[640px] mx-auto px-5 py-4">
@@ -71,7 +76,12 @@ export default function PlanComparison({
             >
               {plan.isPopular && (
                 <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                  <Star className="w-3 h-3 fill-current" /> 인기
+                  <Star className="w-3 h-3 fill-current" /> BEST
+                </div>
+              )}
+              {!plan.isPopular && plan.id === maxSubsidyId && (
+                <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  최대현금지원
                 </div>
               )}
 
