@@ -14,6 +14,7 @@ export default function Footer() {
           <a href="#" className="text-[12px] text-text-muted hover:text-text-secondary">이용약관</a>
           <a href="#" className="text-[12px] text-text-muted hover:text-text-secondary font-bold">개인정보처리방침</a>
           <a href="#" className="text-[12px] text-text-muted hover:text-text-secondary">사업자정보</a>
+          <a href="/admin" className="text-[12px] text-text-muted hover:text-text-secondary">어드민</a>
         </div>
 
         <p className="text-[11px] text-text-muted mt-3">

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 
 type ColorMode = "blue" | "red";
 
-const MODES: { key: ColorMode; label: string; color: string }[] = [
-  { key: "blue", label: "블루", color: "#2640E6" },
-  { key: "red", label: "레드", color: "#EA2804" },
+const MODES: { key: ColorMode; color: string }[] = [
+  { key: "blue", color: "#2640E6" },
+  { key: "red", color: "#EA2804" },
 ];
 
 export default function ColorModeToggle() {
@@ -27,22 +27,19 @@ export default function ColorModeToggle() {
   };
 
   return (
-    <div className="flex items-center bg-muted rounded-full p-0.5 gap-0.5">
-      {MODES.map(({ key, label, color }) => (
+    <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+      {MODES.map(({ key, color }) => (
         <button
           key={key}
           onClick={() => handleChange(key)}
-          className={`flex items-center gap-1 px-3 py-2 rounded-full text-[13px] font-semibold transition-all min-h-[44px] ${
-            mode === key
-              ? "bg-white shadow-sm text-foreground"
-              : "text-muted-foreground hover:text-foreground"
+          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            mode === key ? "bg-white shadow-sm scale-110" : "hover:scale-105"
           }`}
         >
           <span
-            className="w-2.5 h-2.5 rounded-full shrink-0"
+            className="w-3.5 h-3.5 rounded-full"
             style={{ backgroundColor: color }}
           />
-          {label}
         </button>
       ))}
     </div>

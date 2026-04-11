@@ -95,3 +95,32 @@ html { scroll-behavior: smooth; }
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* 트럭 달리는 애니메이션 (천천히) */
+@keyframes truck-slow {
+  0%, 100% { transform: translate(-14px, 0px); }
+  50% { transform: translate(-14px, -1.5px); }
+}
+.animate-truck-slow {
+  animation: truck-slow 0.8s ease-in-out infinite;
+}
+
+@keyframes road-slow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-36px); }
+}
+.animate-road-slow {
+  animation: road-slow 0.8s linear infinite;
+}
+
+@keyframes dust-slow {
+  0% { opacity: 0.4; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-12px) scale(0.5); }
+}
+.animate-dust-slow {
+  animation: dust-slow 1.2s ease-out infinite;
+}
+
+/* 스크롤바 숨기기 */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

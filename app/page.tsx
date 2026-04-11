@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
@@ -146,17 +146,40 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* 트럭 일러스트 */}
-        <div className="flex items-end justify-center gap-2 mt-4 pb-2 select-none">
-          {/* 박스 아이템들 */}
-          <div className="flex gap-1 items-end mb-1">
-            <div className="w-5 h-5 bg-primary/20 border border-primary/30 rounded-sm" />
-            <div className="w-4 h-6 bg-primary/15 border border-primary/25 rounded-sm" />
-            <div className="w-6 h-4 bg-primary/20 border border-primary/30 rounded-sm" />
+        {/* 트럭 달리는 애니메이션 */}
+        <div className="relative h-24 mt-4 mb-2 overflow-hidden select-none">
+          {/* 배경 도시 건물 (고정) */}
+          <div className="absolute bottom-3 left-0 right-0 flex items-end justify-center gap-3 opacity-15">
+            <div className="w-6 h-10 bg-primary rounded-sm" />
+            <div className="w-5 h-14 bg-primary rounded-sm" />
+            <div className="w-7 h-8 bg-primary rounded-sm" />
+            <div className="w-4 h-12 bg-primary rounded-sm" />
+            <div className="w-24" />
+            <div className="w-5 h-11 bg-primary rounded-sm" />
+            <div className="w-7 h-16 bg-primary rounded-sm" />
+            <div className="w-4 h-9 bg-primary rounded-sm" />
+            <div className="w-6 h-13 bg-primary rounded-sm" />
           </div>
-          {/* 트럭 */}
-          <div className="relative">
-            <Truck className="w-14 h-14 text-primary/50" />
+
+          {/* 도로 라인 */}
+          <div className="absolute bottom-2 left-0 right-0 h-px bg-border" />
+          <div className="absolute bottom-2 left-0 right-0 flex gap-3 animate-road-slow">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="w-6 h-px bg-text-muted/30 shrink-0" />
+            ))}
+          </div>
+
+          {/* 트럭 (천천히 바운스) */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-[14px] animate-truck-slow">
+            <Truck className="w-20 h-20 text-primary/50" />
+          </div>
+
+          {/* 바퀴 먼지 */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-[55px]">
+            <div className="flex gap-1 animate-dust-slow">
+              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/15" />
+              <div className="w-1 h-1 rounded-full bg-text-muted/10" />
+            </div>
           </div>
         </div>
       </section>
@@ -239,7 +262,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 이사업체 고객 평가 ─── */}
+      {/* ─── 이사업체 고객 평가 (자동 슬라이드) ─── */}
       <section className="max-w-[640px] mx-auto px-5 pb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[18px] font-bold text-foreground">이사업체 고객 평가</h2>
@@ -250,37 +273,7 @@ export default function HomePage() {
             더보기 <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-
-        {/* 가로 스크롤 리뷰 카드 */}
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 snap-x snap-mandatory scrollbar-hide">
-          {REVIEWS.map((r, i) => (
-            <div
-              key={i}
-              className="bg-card border border-border rounded-2xl p-4 min-w-[268px] snap-start shrink-0"
-            >
-              {/* 별점 */}
-              <div className="flex gap-0.5 mb-2">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star
-                    key={j}
-                    className={`w-4 h-4 ${
-                      j < r.rating ? "text-primary fill-primary" : "text-border"
-                    }`}
-                  />
-                ))}
-              </div>
-              <p className="text-[14px] font-bold text-foreground mb-1">
-                {r.area} {r.company}
-              </p>
-              <p className="text-[13px] text-text-secondary leading-relaxed line-clamp-3 mb-3">
-                {r.text}
-              </p>
-              <p className="text-[12px] text-text-muted">
-                {r.id}님 · {r.period}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ReviewAutoSlider reviews={REVIEWS} />
       </section>
 
       {/* ─── 해피이사 캠페인 ─── */}
@@ -320,6 +313,90 @@ export default function HomePage() {
 /* ═══════════════════════════════════════════ */
 /*  이사 멀티스텝 모달                            */
 /* ═══════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════ */
+/*  고객 평가 자동 슬라이드                         */
+/* ═══════════════════════════════════════════ */
+
+function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const CARD_W = 280;
+  const GAP = 12;
+
+  const startAuto = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      if (!scrollRef.current || isDragging.current) return;
+      const el = scrollRef.current;
+      const max = el.scrollWidth - el.clientWidth;
+      const next = el.scrollLeft + CARD_W + GAP;
+      el.scrollTo({ left: next > max ? 0 : next, behavior: "smooth" });
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    startAuto();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [startAuto]);
+
+  const onDown = (e: React.MouseEvent | React.TouchEvent) => {
+    isDragging.current = true;
+    if (timerRef.current) clearInterval(timerRef.current);
+    const pageX = "touches" in e ? e.touches[0].pageX : e.pageX;
+    startX.current = pageX - (scrollRef.current?.offsetLeft || 0);
+    scrollLeft.current = scrollRef.current?.scrollLeft || 0;
+  };
+
+  const onMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging.current || !scrollRef.current) return;
+    const pageX = "touches" in e ? e.touches[0].pageX : e.pageX;
+    const walk = (pageX - (scrollRef.current.offsetLeft || 0) - startX.current) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const onUp = () => {
+    isDragging.current = false;
+    startAuto();
+  };
+
+  return (
+    <div
+      ref={scrollRef}
+      className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide cursor-grab active:cursor-grabbing"
+      style={{ scrollSnapType: "x mandatory" }}
+      onMouseDown={onDown}
+      onMouseMove={onMove}
+      onMouseUp={onUp}
+      onMouseLeave={onUp}
+      onTouchStart={onDown}
+      onTouchMove={onMove}
+      onTouchEnd={onUp}
+    >
+      {reviews.map((r, i) => (
+        <Link
+          key={i}
+          href="/review"
+          className="bg-card border border-border rounded-2xl p-4 shrink-0"
+          style={{ width: CARD_W, scrollSnapAlign: "start" }}
+          onClick={(e) => { if (Math.abs((scrollRef.current?.scrollLeft || 0) - scrollLeft.current) > 5) e.preventDefault(); }}
+        >
+          <div className="flex gap-0.5 mb-2">
+            {Array.from({ length: 5 }).map((_, j) => (
+              <Star key={j} className={`w-4 h-4 ${j < r.rating ? "text-primary fill-primary" : "text-border"}`} />
+            ))}
+          </div>
+          <p className="text-[14px] font-bold text-foreground truncate">{r.area} {r.company}</p>
+          <p className="text-[13px] text-text-secondary leading-relaxed line-clamp-2 mt-1">{r.text}</p>
+          <p className="text-[12px] text-text-muted mt-2">{r.id}님 · {r.period}</p>
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 import { openPostcode } from "@/lib/daum-postcode";
 
