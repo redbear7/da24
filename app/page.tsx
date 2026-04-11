@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft } from "lucide-react";
+import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
 
 /* ─── 이사 카테고리 ─── */
 const MOVING_CATEGORIES = [
@@ -13,21 +14,42 @@ const MOVING_CATEGORIES = [
     desc: "3룸, 15평대 이상",
     sub: "아파트 · 빌라 · 주택",
     icon: Truck,
+    type: "household",
     href: "/moving?type=household",
+    modalTitle: "전문 포장이사 업체를 통한\n쉽고 안전한 가정이사!",
+    modalItems: [
+      "3룸, 15평대 이상 아파트, 빌라, 주택 거주중이신 분",
+      "전문 포장과 안전한 이사가 필요하신 분",
+      "가구, 가전이 많아 전문 인력이 필요하신 분",
+    ],
   },
   {
     title: "소형이사",
     desc: "15평대 미만",
     sub: "원룸 · 투룸 · 오피스텔",
     icon: Home,
+    type: "small",
     href: "/moving?type=small",
+    modalTitle: "합리적인 비용의\n빠르고 간편한 소형이사!",
+    modalItems: [
+      "15평 미만 원룸, 투룸, 오피스텔 거주중이신 분",
+      "짐이 적어 간편하게 이사하고 싶으신 분",
+      "합리적인 비용으로 이사하고 싶으신 분",
+    ],
   },
   {
     title: "사무실이사",
     desc: "1톤 초과 짐량",
     sub: "빌딩 · 공장 · 상가 등",
     icon: Building2,
+    type: "office",
     href: "/moving?type=office",
+    modalTitle: "전문 업체의 체계적인\n사무실 · 상가 이사!",
+    modalItems: [
+      "1톤 초과 짐량의 빌딩, 공장, 상가 이사",
+      "사무 장비와 서류를 안전하게 옮기고 싶으신 분",
+      "업무 중단 없이 빠르게 이사를 완료하고 싶으신 분",
+    ],
   },
 ];
 
@@ -86,7 +108,9 @@ const REVIEWS = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [bannerIdx, setBannerIdx] = useState(0);
+  const [selectedMove, setSelectedMove] = useState<typeof MOVING_CATEGORIES[number] | null>(null);
 
   const nextBanner = useCallback(() => {
     setBannerIdx((i) => (i + 1) % BANNERS.length);
@@ -109,16 +133,16 @@ export default function HomePage() {
       <section className="max-w-[640px] mx-auto px-5 pt-6 pb-2">
         <div className="grid grid-cols-3 gap-3">
           {MOVING_CATEGORIES.map((cat) => (
-            <Link
+            <button
               key={cat.title}
-              href={cat.href}
-              className="bg-card border border-border rounded-2xl p-4 hover:border-primary/40 transition-colors"
+              onClick={() => setSelectedMove(cat)}
+              className="bg-card border border-border rounded-2xl p-4 hover:border-primary/40 transition-colors text-left"
             >
               <cat.icon className="w-6 h-6 text-primary mb-2" />
               <h3 className="text-[15px] font-bold text-foreground leading-tight">{cat.title}</h3>
               <p className="text-[12px] text-text-secondary mt-1">{cat.desc}</p>
               <p className="text-[11px] text-text-muted mt-0.5">{cat.sub}</p>
-            </Link>
+            </button>
           ))}
         </div>
 
@@ -286,6 +310,57 @@ export default function HomePage() {
       </section>
 
       <Footer />
+
+      {/* ─── 이사 유형 안내 모달 ─── */}
+      {selectedMove && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMove(null)} />
+          <div className="relative bg-card w-full max-w-[400px] rounded-2xl p-6 animate-slide-up">
+            {/* 닫기 */}
+            <button
+              onClick={() => setSelectedMove(null)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+
+            {/* 제목 */}
+            <h2 className="text-[20px] font-bold text-foreground leading-snug whitespace-pre-line">
+              <span className="text-primary">전문 {selectedMove.title.replace("이사", "")}이사 업체</span>를 통한{"\n"}
+              쉽고 안전한 {selectedMove.title}!
+            </h2>
+
+            {/* 안내 박스 */}
+            <div className="mt-5 bg-muted rounded-xl p-4">
+              <p className="text-[14px] font-bold text-foreground mb-3">이런분들께 적합해요!</p>
+              <ol className="space-y-2">
+                {selectedMove.modalItems.map((item, i) => (
+                  <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex gap-1.5">
+                    <span className="text-primary font-bold shrink-0">{i + 1}.</span>
+                    <span dangerouslySetInnerHTML={{
+                      __html: item.replace(
+                        /^([^가-힣]*[가-힣]+(?:,\s*[가-힣0-9]+)*\s*(?:이상|미만|초과)?)/,
+                        '<strong class="text-primary">$1</strong>'
+                      )
+                    }} />
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {/* 다음 버튼 */}
+            <button
+              onClick={() => {
+                setSelectedMove(null);
+                router.push(selectedMove.href);
+              }}
+              className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
