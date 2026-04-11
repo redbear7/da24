@@ -121,6 +121,11 @@ html { scroll-behavior: smooth; }
   animation: dust-slow 1.2s ease-out infinite;
 }
 
+/* 컬러모드별 로고 색상 */
+[data-color-mode="red"] .logo-color {
+  filter: hue-rotate(220deg) saturate(1.3);
+}
+
 /* 스크롤바 숨기기 */
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }

@@ -17,6 +17,7 @@ export default function Header() {
             height={30}
             unoptimized
             priority
+            className="logo-color transition-[filter] duration-300"
           />
         </Link>
 
