@@ -311,56 +311,352 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* ─── 이사 유형 안내 모달 ─── */}
-      {selectedMove && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMove(null)} />
-          <div className="relative bg-card w-full max-w-[400px] rounded-2xl p-6 animate-slide-up">
-            {/* 닫기 */}
-            <button
-              onClick={() => setSelectedMove(null)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
-            >
-              <X className="w-5 h-5 text-muted-foreground" />
-            </button>
+      {/* ─── 이사 멀티스텝 모달 ─── */}
+      {selectedMove && <MovingModal move={selectedMove} onClose={() => setSelectedMove(null)} />}
+    </div>
+  );
+}
 
-            {/* 제목 */}
-            <h2 className="text-[20px] font-bold text-foreground leading-snug whitespace-pre-line">
-              <span className="text-primary">전문 {selectedMove.title.replace("이사", "")}이사 업체</span>를 통한{"\n"}
-              쉽고 안전한 {selectedMove.title}!
-            </h2>
+/* ═══════════════════════════════════════════ */
+/*  이사 멀티스텝 모달                            */
+/* ═══════════════════════════════════════════ */
 
-            {/* 안내 박스 */}
-            <div className="mt-5 bg-muted rounded-xl p-4">
-              <p className="text-[14px] font-bold text-foreground mb-3">이런분들께 적합해요!</p>
-              <ol className="space-y-2">
-                {selectedMove.modalItems.map((item, i) => (
-                  <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex gap-1.5">
-                    <span className="text-primary font-bold shrink-0">{i + 1}.</span>
-                    <span dangerouslySetInnerHTML={{
-                      __html: item.replace(
-                        /^([^가-힣]*[가-힣]+(?:,\s*[가-힣0-9]+)*\s*(?:이상|미만|초과)?)/,
-                        '<strong class="text-primary">$1</strong>'
-                      )
-                    }} />
-                  </li>
-                ))}
-              </ol>
-            </div>
+import { openPostcode } from "@/lib/daum-postcode";
 
-            {/* 다음 버튼 */}
-            <button
-              onClick={() => {
-                setSelectedMove(null);
-                router.push(selectedMove.href);
-              }}
-              className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
-            >
-              다음
-            </button>
-          </div>
+const FLOOR_OPTS = ["1층", "2~5층", "6~10층", "11~20층", "21층 이상", "엘리베이터 없음"];
+
+const MOVE_METHODS = [
+  { key: "full", title: "포장이사", desc: "업체에게 모든 걸 맡기세요!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [0, 1, 2, 3, 4] },
+  { key: "half", title: "반포장이사", desc: "잔짐 포장은 내가, 큰 짐은 업체가!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [1, 2, 3] },
+  { key: "basic", title: "일반이사", desc: "업체가 짐 운반만 도와드려요!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [2] },
+];
+
+type ModalStep = "intro" | "method" | "from" | "to" | "date" | "done";
+
+function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]; onClose: () => void }) {
+  const [step, setStep] = useState<ModalStep>("intro");
+  const [moveMethod, setMoveMethod] = useState<string | null>(null);
+  const [fromAddr, setFromAddr] = useState("");
+  const [fromDetail, setFromDetail] = useState("");
+  const [fromFloor, setFromFloor] = useState("");
+  const [toAddr, setToAddr] = useState("");
+  const [toDetail, setToDetail] = useState("");
+  const [toFloor, setToFloor] = useState("");
+  const [moveDate, setMoveDate] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const today = new Date().toISOString().split("T")[0];
+  const needsMethod = move.type === "small";
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await fetch("/api/consultation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "이사 견적 요청",
+          phone: "",
+          planType: "moving",
+          provider: move.type,
+          planName: move.title,
+          address: `출발: ${fromAddr} ${fromDetail} (${fromFloor}) → 도착: ${toAddr} ${toDetail} (${toFloor})`,
+          memo: `이사 날짜: ${moveDate}`,
+        }),
+      });
+    } catch {}
+    setIsSubmitting(false);
+    setStep("done");
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
+        {/* 핸들바 */}
+        <div className="flex justify-center pt-3 sm:hidden"><div className="w-10 h-1 bg-border rounded-full" /></div>
+
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
+          <h2 className="text-[18px] font-bold text-foreground">
+            {step === "intro" && move.title}
+            {step === "method" && "이사 방식 선택"}
+            {step === "from" && "출발지를 검색해주세요"}
+            {step === "to" && "도착지를 검색해주세요"}
+            {step === "date" && "이사 날짜"}
+            {step === "done" && "신청 완료"}
+          </h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
-      )}
+
+        <div className="px-5 pb-6">
+
+          {/* Step 1: 안내 */}
+          {step === "intro" && (
+            <>
+              <h3 className="text-[18px] font-bold text-foreground leading-snug mt-2">
+                <span className="text-primary">전문 포장이사 업체</span>를 통한{"\n"}
+                쉽고 안전한 {move.title}!
+              </h3>
+              <div className="mt-5 bg-muted rounded-xl p-4">
+                <p className="text-[14px] font-bold text-foreground mb-3">이런분들께 적합해요!</p>
+                <ol className="space-y-2">
+                  {move.modalItems.map((item, i) => (
+                    <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex gap-1.5">
+                      <span className="text-primary font-bold shrink-0">{i + 1}.</span>
+                      {item}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <button onClick={() => setStep(needsMethod ? "method" : "from")} className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all">
+                다음
+              </button>
+            </>
+          )}
+
+          {/* Step 1.5: 이사 방식 선택 (소형이사만) */}
+          {step === "method" && (
+            <>
+              <div className="mt-2">
+                <h3 className="text-[20px] font-bold text-foreground leading-snug">
+                  원하시는 이사 방식을<br />선택해 주세요
+                </h3>
+              </div>
+
+              <div className="mt-5 space-y-3">
+                {MOVE_METHODS.map((m) => (
+                  <button
+                    key={m.key}
+                    onClick={() => setMoveMethod(m.key)}
+                    className={`w-full text-left bg-card border-2 rounded-xl p-4 transition-all ${
+                      moveMethod === m.key ? "border-primary" : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <p className="text-[16px] font-bold text-foreground">{m.title}</p>
+                    <p className="text-[13px] text-text-secondary mt-0.5">{m.desc}</p>
+                    {/* 단계 바 */}
+                    <div className="flex items-center mt-3 gap-0">
+                      {m.steps.map((s, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center">
+                          <div className="flex items-center w-full">
+                            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${m.highlight.includes(i) ? "bg-primary" : "bg-border"}`} />
+                            {i < m.steps.length - 1 && (
+                              <div className={`flex-1 h-0.5 ${m.highlight.includes(i) && m.highlight.includes(i + 1) ? "bg-primary" : "bg-border"}`} />
+                            )}
+                          </div>
+                          <span className={`text-[11px] mt-1 ${m.highlight.includes(i) ? "text-foreground font-medium" : "text-text-muted"}`}>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2 mt-5">
+                <button
+                  onClick={() => setStep("intro")}
+                  className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
+                >
+                  이전
+                </button>
+                <button
+                  onClick={() => setStep("from")}
+                  disabled={!moveMethod}
+                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                >
+                  다음
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Step 2: 출발지 */}
+          {step === "from" && (
+            <>
+              <div className="mt-2 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={fromAddr}
+                    readOnly
+                    onClick={() => openPostcode(setFromAddr)}
+                    placeholder="도로명, 지번, 건물명 (2글자 이상)"
+                    className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
+                  />
+                  <button onClick={() => openPostcode(setFromAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
+                    🔍
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={fromDetail}
+                  onChange={(e) => setFromDetail(e.target.value)}
+                  placeholder="상세 주소 (동/호수)"
+                  className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
+                />
+
+                {/* 주소검색 Tip */}
+                {!fromAddr && (
+                  <div className="mt-4">
+                    <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
+                    <ul className="space-y-2 text-[13px] text-text-secondary">
+                      <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
+                      <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
+                      <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
+                    </ul>
+                  </div>
+                )}
+
+                {/* 층수 선택 */}
+                {fromAddr && (
+                  <div className="mt-3">
+                    <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {FLOOR_OPTS.map((f) => (
+                        <button key={f} onClick={() => setFromFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => setStep("to")}
+                disabled={!fromAddr}
+                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+              >
+                다음
+              </button>
+            </>
+          )}
+
+          {/* Step 3: 도착지 */}
+          {step === "to" && (
+            <>
+              <div className="mt-2 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={toAddr}
+                    readOnly
+                    onClick={() => openPostcode(setToAddr)}
+                    placeholder="도로명, 지번, 건물명 (2글자 이상)"
+                    className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
+                  />
+                  <button onClick={() => openPostcode(setToAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
+                    🔍
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={toDetail}
+                  onChange={(e) => setToDetail(e.target.value)}
+                  placeholder="상세 주소 (동/호수)"
+                  className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
+                />
+
+                {!toAddr && (
+                  <div className="mt-4">
+                    <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
+                    <ul className="space-y-2 text-[13px] text-text-secondary">
+                      <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
+                      <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
+                      <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
+                    </ul>
+                  </div>
+                )}
+
+                {toAddr && (
+                  <div className="mt-3">
+                    <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {FLOOR_OPTS.map((f) => (
+                        <button key={f} onClick={() => setToFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => setStep("date")}
+                disabled={!toAddr}
+                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+              >
+                다음
+              </button>
+            </>
+          )}
+
+          {/* Step 4: 이사 날짜 */}
+          {step === "date" && (
+            <>
+              <div className="mt-4 space-y-4">
+                {/* 요약 */}
+                <div className="bg-muted rounded-xl p-4 space-y-2 text-[13px]">
+                  <div className="flex gap-2">
+                    <span className="text-primary font-bold shrink-0">출발</span>
+                    <span className="text-foreground">{fromAddr} {fromDetail} {fromFloor && `(${fromFloor})`}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-accent font-bold shrink-0">도착</span>
+                    <span className="text-foreground">{toAddr} {toDetail} {toFloor && `(${toFloor})`}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[14px] font-semibold text-foreground mb-2">이사 희망일을 선택해주세요</p>
+                  <input
+                    type="date"
+                    value={moveDate}
+                    min={today}
+                    onChange={(e) => setMoveDate(e.target.value)}
+                    className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 accent-primary" />
+                  <span className="text-[13px] text-text-secondary">보관이사 필요</span>
+                  <span className="text-[11px] text-text-muted">ⓘ</span>
+                </label>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={!moveDate || isSubmitting}
+                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+              >
+                {isSubmitting ? "신청 중..." : "추천업체 바로 신청하기"}
+              </button>
+            </>
+          )}
+
+          {/* Step 5: 완료 */}
+          {step === "done" && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-[28px]">✅</span>
+              </div>
+              <h3 className="text-[20px] font-bold text-foreground">견적 요청 완료!</h3>
+              <p className="text-[14px] text-text-secondary mt-2 leading-relaxed">
+                추천 업체에서 곧 연락드릴 예정입니다.<br />
+                채팅내역에서 진행 상황을 확인하세요.
+              </p>
+              <button onClick={onClose} className="w-full mt-6 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all">
+                확인
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
