@@ -156,7 +156,7 @@ export default function HistoryPage() {
                   value={phone}
                   onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(""); }}
                   placeholder="010-1234-5678"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[20px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
               </label>
               {error && (
@@ -206,7 +206,7 @@ export default function HistoryPage() {
                   value={code}
                   onChange={(e) => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
                   placeholder="인증번호 6자리"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[20px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
                 />
               </label>
               {error && (
