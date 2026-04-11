@@ -244,7 +244,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[18px] font-bold text-foreground">이사업체 고객 평가</h2>
           <Link
-            href="#"
+            href="/review"
             className="text-[13px] text-text-muted flex items-center gap-0.5 hover:text-foreground transition-colors"
           >
             더보기 <ChevronRight className="w-4 h-4" />
