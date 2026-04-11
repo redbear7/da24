@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LuggageSelector, { type LuggageData } from "@/components/LuggageSelector";
 import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
 
 /* ─── 이사 카테고리 ─── */
@@ -146,17 +147,35 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* 트럭 일러스트 */}
-        <div className="flex items-end justify-center gap-2 mt-4 pb-2 select-none">
-          {/* 박스 아이템들 */}
-          <div className="flex gap-1 items-end mb-1">
-            <div className="w-5 h-5 bg-primary/20 border border-primary/30 rounded-sm" />
-            <div className="w-4 h-6 bg-primary/15 border border-primary/25 rounded-sm" />
-            <div className="w-6 h-4 bg-primary/20 border border-primary/30 rounded-sm" />
+        {/* 트럭 달리는 애니메이션 */}
+        <div className="relative h-16 mt-4 mb-2 overflow-hidden select-none">
+          {/* 도로 라인 */}
+          <div className="absolute bottom-2 left-0 right-0 h-px bg-border" />
+          <div className="absolute bottom-2 left-0 right-0 flex gap-3 animate-road">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="w-6 h-px bg-text-muted/30 shrink-0" />
+            ))}
           </div>
-          {/* 트럭 */}
-          <div className="relative">
-            <Truck className="w-14 h-14 text-primary/50" />
+
+          {/* 박스들 (트럭 뒤에서 흔들림) */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-[60px] flex gap-1 items-end animate-bounce-slow">
+            <div className="w-5 h-5 bg-primary/20 border border-primary/30 rounded-sm animate-wiggle" style={{ animationDelay: "0s" }} />
+            <div className="w-4 h-6 bg-primary/15 border border-primary/25 rounded-sm animate-wiggle" style={{ animationDelay: "0.2s" }} />
+            <div className="w-6 h-4 bg-primary/20 border border-primary/30 rounded-sm animate-wiggle" style={{ animationDelay: "0.4s" }} />
+          </div>
+
+          {/* 트럭 (제자리에서 달리는 느낌) */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-[10px] animate-truck-run">
+            <Truck className="w-14 h-14 text-primary/60" />
+          </div>
+
+          {/* 바퀴 먼지 */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-[45px]">
+            <div className="flex gap-1 animate-dust">
+              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/20" />
+              <div className="w-1 h-1 rounded-full bg-text-muted/15" />
+              <div className="w-0.5 h-0.5 rounded-full bg-text-muted/10" />
+            </div>
           </div>
         </div>
       </section>
@@ -331,34 +350,18 @@ const MOVE_METHODS = [
   { key: "basic", title: "일반이사", desc: "업체가 짐 운반만 도와드려요!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [2] },
 ];
 
-const LUGGAGE_FURNITURE = [
-  { key: "bed", label: "침대", icon: "🛏️" },
-  { key: "wardrobe", label: "옷장", icon: "🚪" },
-  { key: "bookshelf", label: "책장", icon: "📚" },
-  { key: "desk", label: "책상", icon: "🪑" },
-  { key: "chair", label: "의자", icon: "💺" },
-  { key: "table", label: "테이블", icon: "🪵" },
-  { key: "sofa", label: "소파", icon: "🛋️" },
-  { key: "dresser", label: "화장대", icon: "🪞" },
-  { key: "cabinet", label: "수납장", icon: "🗄️" },
-  { key: "drawer", label: "서랍장", icon: "📦" },
-];
-
-const LUGGAGE_APPLIANCE = [
-  { key: "tv", label: "TV/모니터", icon: "📺" },
-  { key: "washer", label: "세탁기", icon: "🫧" },
-  { key: "dryer", label: "건조기", icon: "♨️" },
-  { key: "aircon", label: "에어컨", icon: "❄️" },
-  { key: "fridge", label: "냉장고", icon: "🧊" },
-  { key: "clothcare", label: "의류관리기", icon: "👔" },
-];
 
 type ModalStep = "intro" | "method" | "luggage" | "from" | "to" | "date" | "done";
 
 function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]; onClose: () => void }) {
   const [step, setStep] = useState<ModalStep>("intro");
   const [moveMethod, setMoveMethod] = useState<string | null>(null);
-  const [luggage, setLuggage] = useState<Record<string, number>>({});
+  const [luggage, setLuggage] = useState<LuggageData>({
+    furniture: [],
+    home_appliance: [],
+    small_appliance: [],
+    box: 0,
+  });
   const [fromAddr, setFromAddr] = useState("");
   const [fromDetail, setFromDetail] = useState("");
   const [fromFloor, setFromFloor] = useState("");
@@ -500,89 +503,13 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
           {/* Step 2: 짐량 선택 (소형이사) */}
           {step === "luggage" && (
             <>
-              <div className="mt-2">
+              <div className="mt-2 mb-4">
                 <h3 className="text-[20px] font-bold text-primary leading-snug">
                   내 짐량에 맞는 이사, 고민하지 마세요!
                 </h3>
-                <p className="text-[13px] text-text-secondary mt-2">
-                  선택하신 짐량이 원룸 규모면 소형이사, 그 이상은 가정이사로 자동 접수해드려요.
-                </p>
-                <p className="text-[12px] text-text-muted mt-1">
-                  *짐량 선택 시 버리고 갈 짐은 제외하고 입력해 주세요.
-                </p>
               </div>
 
-              {/* 가구 */}
-              <div className="mt-5">
-                <h4 className="text-[16px] font-bold text-foreground mb-3">가구</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {LUGGAGE_FURNITURE.map((item) => {
-                    const count = luggage[item.key] || 0;
-                    return (
-                      <div
-                        key={item.key}
-                        className={`border rounded-xl p-3 text-center transition-all ${
-                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
-                        }`}
-                      >
-                        <span className="text-[24px]">{item.icon}</span>
-                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
-                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
-                          >
-                            −
-                          </button>
-                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 가전 */}
-              <div className="mt-5">
-                <h4 className="text-[16px] font-bold text-foreground mb-3">가전</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {LUGGAGE_APPLIANCE.map((item) => {
-                    const count = luggage[item.key] || 0;
-                    return (
-                      <div
-                        key={item.key}
-                        className={`border rounded-xl p-3 text-center transition-all ${
-                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
-                        }`}
-                      >
-                        <span className="text-[24px]">{item.icon}</span>
-                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
-                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
-                          >
-                            −
-                          </button>
-                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <LuggageSelector value={luggage} onChange={setLuggage} />
 
               <div className="flex gap-2 mt-5">
                 <button
@@ -593,7 +520,12 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
                 </button>
                 <button
                   onClick={() => setStep("from")}
-                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
+                  disabled={
+                    luggage.furniture.length === 0 &&
+                    luggage.home_appliance.length === 0 &&
+                    luggage.small_appliance.length === 0
+                  }
+                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
                 >
                   다음
                 </button>
