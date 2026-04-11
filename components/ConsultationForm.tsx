@@ -74,7 +74,7 @@ export default function ConsultationForm({
   if (!isOpen) return null;
 
   const inputCls =
-    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
+    "w-full px-4 py-3 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
