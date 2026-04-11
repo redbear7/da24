@@ -79,32 +79,13 @@ const BANNERS = [
   },
 ];
 
-/* ─── 고객 리뷰 ─── */
+/* ─── 고객 리뷰 (최근 5개, 창원시) ─── */
 const REVIEWS = [
-  {
-    area: "서울시 강서구",
-    company: "업체 한******",
-    rating: 5,
-    text: "골목이라는 열악한 조건의 이사였음에도 불구하고 끝까지 처리해 주셨어요~",
-    id: "591423",
-    period: "1개월 내 이사",
-  },
-  {
-    area: "인천시 남동구",
-    company: "업체 아********",
-    rating: 5,
-    text: "이분들께는 안되는건 없으신거같아요!! 정말 최고의 이사였습니다",
-    id: "591332",
-    period: "2개월 내 이사",
-  },
-  {
-    area: "수원시",
-    company: "업체 대***",
-    rating: 3,
-    text: "전반적으로 괜찮았는데 좀 더 꼼꼼하게 해주셨으면 했습니다",
-    id: "591206",
-    period: "1개월 내 이사",
-  },
+  { area: "창원시 성산구", company: "업체 한*****", rating: 5, text: "용지동에서 상남동으로 이사했는데, 사다리차 작업도 완벽했고 가격도 합리적이었습니다.", id: "591423", period: "1개월 내 이사" },
+  { area: "창원시 마산합포구", company: "업체 으*****", rating: 5, text: "비 오는 날이었는데도 방수 포장까지 해주시고 정말 감동이었습니다.", id: "591332", period: "2개월 내 이사" },
+  { area: "창원시 진해구", company: "업체 스****", rating: 5, text: "원룸 이사인데도 매우 친절하고 빠르게 진행해주셨어요. 1시간 만에 끝!", id: "591287", period: "1개월 내 이사" },
+  { area: "창원시 의창구", company: "업체 새****", rating: 4, text: "팔용동에서 봉곡동으로 이사했어요. 5톤 트럭으로 한 번에 다 옮겨주셨습니다.", id: "591206", period: "3주 내 이사" },
+  { area: "창원시 마산회원구", company: "업체 굿***", rating: 5, text: "양덕동 신축 아파트로 이사했는데 바닥 보양 작업까지 꼼꼼하게 해주셨어요.", id: "591189", period: "1개월 내 이사" },
 ];
 
 export default function HomePage() {
@@ -324,18 +305,24 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
-  const CARD_W = 280;
   const GAP = 12;
+
+  const getCardWidth = () => {
+    if (typeof window === "undefined") return 280;
+    const vw = Math.min(window.innerWidth, 640);
+    return Math.floor((vw - 40 - GAP) / 2); // 2장 보이게 (px-5 양쪽 = 40)
+  };
 
   const startAuto = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       if (!scrollRef.current || isDragging.current) return;
       const el = scrollRef.current;
+      const cardW = getCardWidth();
       const max = el.scrollWidth - el.clientWidth;
-      const next = el.scrollLeft + CARD_W + GAP;
+      const next = el.scrollLeft + cardW + GAP;
       el.scrollTo({ left: next > max ? 0 : next, behavior: "smooth" });
-    }, 3000);
+    }, 4000);
   }, []);
 
   useEffect(() => {
@@ -381,7 +368,7 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
           key={i}
           href="/review"
           className="bg-card border border-border rounded-2xl p-4 shrink-0"
-          style={{ width: CARD_W, scrollSnapAlign: "start" }}
+          style={{ width: "calc((min(100vw, 640px) - 40px - 12px) / 2)", minWidth: 240, scrollSnapAlign: "start" }}
           onClick={(e) => { if (Math.abs((scrollRef.current?.scrollLeft || 0) - scrollLeft.current) > 5) e.preventDefault(); }}
         >
           <div className="flex gap-0.5 mb-2">
