@@ -244,7 +244,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── 이사업체 고객 평가 (자동 슬라이드) ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-6">
+      <section className="max-w-[640px] mx-auto px-5 pb-6 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[18px] font-bold text-foreground">이사업체 고객 평가</h2>
           <Link
@@ -322,7 +322,7 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
       const max = el.scrollWidth - el.clientWidth;
       const next = el.scrollLeft + cardW + GAP;
       el.scrollTo({ left: next > max ? 0 : next, behavior: "smooth" });
-    }, 4000);
+    }, 6000);
   }, []);
 
   useEffect(() => {
@@ -353,7 +353,7 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
   return (
     <div
       ref={scrollRef}
-      className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5 scrollbar-hide cursor-grab active:cursor-grabbing"
+      className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide cursor-grab active:cursor-grabbing"
       style={{ scrollSnapType: "x mandatory" }}
       onMouseDown={onDown}
       onMouseMove={onMove}
@@ -368,7 +368,7 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
           key={i}
           href="/review"
           className="bg-card border border-border rounded-2xl p-4 shrink-0"
-          style={{ width: "calc((min(100vw, 640px) - 40px - 12px) / 2)", minWidth: 240, scrollSnapAlign: "start" }}
+          style={{ width: "calc(50% - 6px)", minWidth: 220, scrollSnapAlign: "start" }}
           onClick={(e) => { if (Math.abs((scrollRef.current?.scrollLeft || 0) - scrollLeft.current) > 5) e.preventDefault(); }}
         >
           <div className="flex gap-0.5 mb-2">
