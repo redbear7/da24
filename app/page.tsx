@@ -331,11 +331,34 @@ const MOVE_METHODS = [
   { key: "basic", title: "일반이사", desc: "업체가 짐 운반만 도와드려요!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [2] },
 ];
 
-type ModalStep = "intro" | "method" | "from" | "to" | "date" | "done";
+const LUGGAGE_FURNITURE = [
+  { key: "bed", label: "침대", icon: "🛏️" },
+  { key: "wardrobe", label: "옷장", icon: "🚪" },
+  { key: "bookshelf", label: "책장", icon: "📚" },
+  { key: "desk", label: "책상", icon: "🪑" },
+  { key: "chair", label: "의자", icon: "💺" },
+  { key: "table", label: "테이블", icon: "🪵" },
+  { key: "sofa", label: "소파", icon: "🛋️" },
+  { key: "dresser", label: "화장대", icon: "🪞" },
+  { key: "cabinet", label: "수납장", icon: "🗄️" },
+  { key: "drawer", label: "서랍장", icon: "📦" },
+];
+
+const LUGGAGE_APPLIANCE = [
+  { key: "tv", label: "TV/모니터", icon: "📺" },
+  { key: "washer", label: "세탁기", icon: "🫧" },
+  { key: "dryer", label: "건조기", icon: "♨️" },
+  { key: "aircon", label: "에어컨", icon: "❄️" },
+  { key: "fridge", label: "냉장고", icon: "🧊" },
+  { key: "clothcare", label: "의류관리기", icon: "👔" },
+];
+
+type ModalStep = "intro" | "method" | "luggage" | "from" | "to" | "date" | "done";
 
 function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]; onClose: () => void }) {
   const [step, setStep] = useState<ModalStep>("intro");
   const [moveMethod, setMoveMethod] = useState<string | null>(null);
+  const [luggage, setLuggage] = useState<Record<string, number>>({});
   const [fromAddr, setFromAddr] = useState("");
   const [fromDetail, setFromDetail] = useState("");
   const [fromFloor, setFromFloor] = useState("");
@@ -381,6 +404,7 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
           <h2 className="text-[18px] font-bold text-foreground">
             {step === "intro" && move.title}
             {step === "method" && "이사 방식 선택"}
+            {step === "luggage" && "짐량 선택"}
             {step === "from" && "출발지를 검색해주세요"}
             {step === "to" && "도착지를 검색해주세요"}
             {step === "date" && "이사 날짜"}
@@ -463,7 +487,7 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
                   이전
                 </button>
                 <button
-                  onClick={() => setStep("from")}
+                  onClick={() => setStep("luggage")}
                   disabled={!moveMethod}
                   className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
                 >
@@ -473,7 +497,111 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
             </>
           )}
 
-          {/* Step 2: 출발지 */}
+          {/* Step 2: 짐량 선택 (소형이사) */}
+          {step === "luggage" && (
+            <>
+              <div className="mt-2">
+                <h3 className="text-[20px] font-bold text-primary leading-snug">
+                  내 짐량에 맞는 이사, 고민하지 마세요!
+                </h3>
+                <p className="text-[13px] text-text-secondary mt-2">
+                  선택하신 짐량이 원룸 규모면 소형이사, 그 이상은 가정이사로 자동 접수해드려요.
+                </p>
+                <p className="text-[12px] text-text-muted mt-1">
+                  *짐량 선택 시 버리고 갈 짐은 제외하고 입력해 주세요.
+                </p>
+              </div>
+
+              {/* 가구 */}
+              <div className="mt-5">
+                <h4 className="text-[16px] font-bold text-foreground mb-3">가구</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {LUGGAGE_FURNITURE.map((item) => {
+                    const count = luggage[item.key] || 0;
+                    return (
+                      <div
+                        key={item.key}
+                        className={`border rounded-xl p-3 text-center transition-all ${
+                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
+                        }`}
+                      >
+                        <span className="text-[24px]">{item.icon}</span>
+                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                          <button
+                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
+                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
+                          >
+                            −
+                          </button>
+                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
+                          <button
+                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
+                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 가전 */}
+              <div className="mt-5">
+                <h4 className="text-[16px] font-bold text-foreground mb-3">가전</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {LUGGAGE_APPLIANCE.map((item) => {
+                    const count = luggage[item.key] || 0;
+                    return (
+                      <div
+                        key={item.key}
+                        className={`border rounded-xl p-3 text-center transition-all ${
+                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
+                        }`}
+                      >
+                        <span className="text-[24px]">{item.icon}</span>
+                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                          <button
+                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
+                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
+                          >
+                            −
+                          </button>
+                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
+                          <button
+                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
+                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-5">
+                <button
+                  onClick={() => setStep("method")}
+                  className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
+                >
+                  이전
+                </button>
+                <button
+                  onClick={() => setStep("from")}
+                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
+                >
+                  다음
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Step 3: 출발지 */}
           {step === "from" && (
             <>
               <div className="mt-2 space-y-3">
