@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "다이사 - 인터넷 가입 비교",
+  title: "다이사 - 홈서비스 플랫폼",
   description:
-    "KT, LG U+, SK 통신 3사 인터넷 요금제를 한눈에 비교하고 최대 혜택을 받으세요. 무료 상담 신청까지 1분이면 충분합니다.",
-  keywords: "인터넷 가입, 통신사 비교, KT, LG U+, SK, 인터넷 설치, 지원금",
+    "이사, 입주청소, 인터넷, 에어컨, 대출 비교까지. 무료 상담 신청으로 최대 혜택을 받으세요.",
+  keywords: "이사, 입주청소, 인터넷 가입, 에어컨, 대출, 통신사 비교",
   openGraph: {
-    title: "다이사 - 인터넷 가입 비교",
-    description: "통신 3사 인터넷 요금제 비교 & 최대 혜택 무료 상담",
+    title: "다이사 - 홈서비스 플랫폼",
+    description: "이사/청소/인터넷/에어컨/대출 한번에 비교 & 무료 상담",
     type: "website",
   },
 };
@@ -30,6 +31,11 @@ export default function RootLayout({
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
+        {/* 카카오 주소 검색 (Daum Postcode) */}
+        <Script
+          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

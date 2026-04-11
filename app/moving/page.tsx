@@ -124,6 +124,31 @@ function MoveTypeSelector({
   );
 }
 
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (config: {
+        oncomplete: (data: { address: string; zonecode: string; buildingName?: string }) => void;
+      }) => { open: () => void };
+    };
+  }
+}
+
+function openPostcode(onComplete: (addr: string) => void) {
+  if (typeof window === "undefined" || !window.daum?.Postcode) {
+    alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+    return;
+  }
+  new window.daum.Postcode({
+    oncomplete: (data) => {
+      const full = data.buildingName
+        ? `${data.address} (${data.buildingName})`
+        : data.address;
+      onComplete(full);
+    },
+  }).open();
+}
+
 function AddressSection({
   fromAddr,
   fromDetail,
@@ -143,6 +168,8 @@ function AddressSection({
   onToChange: (v: string) => void;
   onToDetailChange: (v: string) => void;
 }) {
+  const inputBase = "w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all";
+
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-4">
       <h2 className="text-[16px] font-bold text-foreground mb-3">출발지 / 도착지</h2>
@@ -152,19 +179,29 @@ function AddressSection({
           <p className="text-[12px] font-semibold text-primary mb-2 flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5" /> 출발지
           </p>
-          <input
-            type="text"
-            value={fromAddr}
-            onChange={(e) => onFromChange(e.target.value)}
-            placeholder="예: 창원시 성산구 용지동"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all mb-2"
-          />
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={fromAddr}
+              readOnly
+              onClick={() => openPostcode(onFromChange)}
+              placeholder="주소 검색을 눌러주세요"
+              className={`${inputBase} flex-1 cursor-pointer`}
+            />
+            <button
+              type="button"
+              onClick={() => openPostcode(onFromChange)}
+              className="px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all shrink-0"
+            >
+              주소 검색
+            </button>
+          </div>
           <input
             type="text"
             value={fromDetail}
             onChange={(e) => onFromDetailChange(e.target.value)}
             placeholder="상세 주소 (동/호수)"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all"
+            className={inputBase}
           />
         </div>
 
@@ -179,19 +216,29 @@ function AddressSection({
           <p className="text-[12px] font-semibold text-accent mb-2 flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5" /> 도착지
           </p>
-          <input
-            type="text"
-            value={toAddr}
-            onChange={(e) => onToChange(e.target.value)}
-            placeholder="예: 창원시 의창구 봉곡동"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all mb-2"
-          />
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={toAddr}
+              readOnly
+              onClick={() => openPostcode(onToChange)}
+              placeholder="주소 검색을 눌러주세요"
+              className={`${inputBase} flex-1 cursor-pointer`}
+            />
+            <button
+              type="button"
+              onClick={() => openPostcode(onToChange)}
+              className="px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all shrink-0"
+            >
+              주소 검색
+            </button>
+          </div>
           <input
             type="text"
             value={toDetail}
             onChange={(e) => onToDetailChange(e.target.value)}
             placeholder="상세 주소 (동/호수)"
-            className="w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all"
+            className={inputBase}
           />
         </div>
       </div>
