@@ -2,24 +2,31 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Shield, Phone, Loader2, ArrowLeft, RefreshCw, Inbox } from "lucide-react";
+import { Shield, Phone, Loader2, ArrowLeft, RefreshCw, Inbox, Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const LS_KEY = "verified_phone";
+const LS_SAVE_PHONE = "saved_phone";
 
 type Step = "intro" | "phone" | "code" | "done";
 
 export default function HistoryPage() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("010-");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<Step>("intro");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [savePhone, setSavePhone] = useState(true);
 
   useEffect(() => {
     if (localStorage.getItem(LS_KEY)) {
       setStep("done");
+      return;
+    }
+    const saved = localStorage.getItem(LS_SAVE_PHONE);
+    if (saved) {
+      setPhone(formatPhone(saved));
     }
   }, []);
 
@@ -28,6 +35,16 @@ export default function HistoryPage() {
     if (nums.length <= 3) return nums;
     if (nums.length <= 7) return `${nums.slice(0, 3)}-${nums.slice(3)}`;
     return `${nums.slice(0, 3)}-${nums.slice(3, 7)}-${nums.slice(7)}`;
+  };
+
+  const handlePhoneChange = (val: string) => {
+    const nums = val.replace(/\D/g, "");
+    if (nums.length < 3) {
+      setPhone("010-");
+      return;
+    }
+    setPhone(formatPhone(nums));
+    setError("");
   };
 
   const handleSendCode = async () => {
@@ -44,6 +61,11 @@ export default function HistoryPage() {
       if (!res.ok) {
         setError(data.error || "인증번호 발송에 실패했습니다.");
         return;
+      }
+      if (savePhone) {
+        localStorage.setItem(LS_SAVE_PHONE, phone.replace(/\D/g, ""));
+      } else {
+        localStorage.removeItem(LS_SAVE_PHONE);
       }
       setStep("code");
     } catch {
@@ -105,7 +127,6 @@ export default function HistoryPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-5 py-16">
         <div className="w-full max-w-[400px]">
 
-          {/* 인증 전 */}
           {step === "intro" && (
             <div className="text-center">
               <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
@@ -128,7 +149,6 @@ export default function HistoryPage() {
             </div>
           )}
 
-          {/* 번호 입력 */}
           {step === "phone" && (
             <div>
               <button
@@ -147,18 +167,36 @@ export default function HistoryPage() {
                   휴대폰 번호를 입력해 주세요
                 </p>
               </div>
-              <label className="block mb-4">
+              <label className="block mb-3">
                 <span className="text-[14px] font-semibold text-foreground mb-1.5 block">
                   휴대폰 번호
                 </span>
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(""); }}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
                   placeholder="010-1234-5678"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[20px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[18px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
               </label>
+
+              <label className="flex items-center gap-2 mb-4 cursor-pointer select-none">
+                <button
+                  type="button"
+                  onClick={() => setSavePhone(!savePhone)}
+                  className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                    savePhone
+                      ? "bg-primary"
+                      : "bg-card border-2 border-border"
+                  }`}
+                >
+                  {savePhone && <Check className="w-3.5 h-3.5 text-white" />}
+                </button>
+                <span className="text-[14px] text-text-secondary">
+                  번호 저장 (다음에도 이용)
+                </span>
+              </label>
+
               {error && (
                 <p className="text-[13px] text-red-500 mb-3">{error}</p>
               )}
@@ -176,7 +214,6 @@ export default function HistoryPage() {
             </div>
           )}
 
-          {/* 인증번호 입력 */}
           {step === "code" && (
             <div>
               <button
@@ -206,7 +243,7 @@ export default function HistoryPage() {
                   value={code}
                   onChange={(e) => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
                   placeholder="인증번호 6자리"
-                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[20px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
+                  className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[18px] font-semibold text-foreground placeholder:text-text-muted placeholder:font-normal focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
                 />
               </label>
               {error && (
@@ -234,7 +271,6 @@ export default function HistoryPage() {
             </div>
           )}
 
-          {/* 인증 후 - 신청 내역 없음 */}
           {step === "done" && (
             <div className="text-center">
               <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
@@ -248,7 +284,7 @@ export default function HistoryPage() {
               </p>
               <Link
                 href="/"
-                className="inline-block mt-8 px-6 py-3.5 bg-primary text-primary-foreground font-bold rounded-xl text-[15px] hover:opacity-90 active:scale-[0.98] transition-all"
+                className="block w-full mt-8 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] text-center hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 인터넷 비교하러 가기
               </Link>

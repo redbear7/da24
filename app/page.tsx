@@ -165,10 +165,9 @@ export default function HomePage() {
       {/* ─── 대출 / 렌탈 ─── */}
       <section className="max-w-[640px] mx-auto px-5 pb-5">
         <div className="grid grid-cols-2 border border-border rounded-xl overflow-hidden">
-          <div className="py-3.5 text-center border-r border-border relative">
-            <span className="text-[15px] font-semibold text-text-muted">대출</span>
-            <span className="ml-1.5 text-[10px] font-medium text-text-muted bg-muted px-1.5 py-0.5 rounded-full">준비 중</span>
-          </div>
+          <Link href="/loan" className="py-3.5 text-center border-r border-border hover:bg-muted transition-colors">
+            <span className="text-[15px] font-semibold text-foreground">대출</span>
+          </Link>
           <div className="py-3.5 text-center relative">
             <span className="text-[15px] font-semibold text-text-muted">렌탈</span>
             <span className="ml-1.5 text-[10px] font-medium text-text-muted bg-muted px-1.5 py-0.5 rounded-full">준비 중</span>
