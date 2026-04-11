@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Shield, Phone, Loader2, ArrowLeft, RefreshCw, Inbox } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+const LS_KEY = "verified_phone";
 
 type Step = "intro" | "phone" | "code" | "done";
 
@@ -13,6 +15,13 @@ export default function HistoryPage() {
   const [code, setCode] = useState("");
   const [step, setStep] = useState<Step>("intro");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem(LS_KEY)) {
+      setStep("done");
+    }
+  }, []);
 
   const formatPhone = (val: string) => {
     const nums = val.replace(/\D/g, "").slice(0, 11);
@@ -24,24 +33,69 @@ export default function HistoryPage() {
   const handleSendCode = async () => {
     if (!phone.trim() || phone.replace(/\D/g, "").length < 10) return;
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
-    setStep("code");
+    setError("");
+    try {
+      const res = await fetch("/api/sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "인증번호 발송에 실패했습니다.");
+        return;
+      }
+      setStep("code");
+    } catch {
+      setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleConfirm = async () => {
     if (!code.trim() || code.length < 6) return;
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
-    setStep("done");
+    setError("");
+    try {
+      const res = await fetch("/api/sms/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "인증에 실패했습니다.");
+        return;
+      }
+      localStorage.setItem(LS_KEY, phone.replace(/\D/g, ""));
+      setStep("done");
+    } catch {
+      setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResend = async () => {
     setCode("");
+    setError("");
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setIsLoading(false);
+    try {
+      const res = await fetch("/api/sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "재발송에 실패했습니다.");
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -78,7 +132,7 @@ export default function HistoryPage() {
           {step === "phone" && (
             <div>
               <button
-                onClick={() => setStep("intro")}
+                onClick={() => { setError(""); setStep("intro"); }}
                 className="flex items-center gap-1 text-[14px] text-text-secondary mb-6 hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -100,11 +154,14 @@ export default function HistoryPage() {
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  onChange={(e) => { setPhone(formatPhone(e.target.value)); setError(""); }}
                   placeholder="010-1234-5678"
                   className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                 />
               </label>
+              {error && (
+                <p className="text-[13px] text-red-500 mb-3">{error}</p>
+              )}
               <button
                 onClick={handleSendCode}
                 disabled={isLoading || phone.replace(/\D/g, "").length < 10}
@@ -123,7 +180,7 @@ export default function HistoryPage() {
           {step === "code" && (
             <div>
               <button
-                onClick={() => { setCode(""); setStep("phone"); }}
+                onClick={() => { setCode(""); setError(""); setStep("phone"); }}
                 className="flex items-center gap-1 text-[14px] text-text-secondary mb-6 hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -147,11 +204,14 @@ export default function HistoryPage() {
                   type="text"
                   inputMode="numeric"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onChange={(e) => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
                   placeholder="인증번호 6자리"
                   className="w-full px-4 py-3.5 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all tracking-widest"
                 />
               </label>
+              {error && (
+                <p className="text-[13px] text-red-500 mb-3">{error}</p>
+              )}
               <button
                 onClick={handleConfirm}
                 disabled={isLoading || code.length < 6}
