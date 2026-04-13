@@ -334,27 +334,29 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
     isDragging.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     const pageX = "touches" in e ? e.touches[0].pageX : e.pageX;
-    startX.current = pageX - (scrollRef.current?.offsetLeft || 0);
+    startX.current = pageX;
     scrollLeft.current = scrollRef.current?.scrollLeft || 0;
   };
 
   const onMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging.current || !scrollRef.current) return;
+    e.preventDefault();
     const pageX = "touches" in e ? e.touches[0].pageX : e.pageX;
-    const walk = (pageX - (scrollRef.current.offsetLeft || 0) - startX.current) * 1.5;
+    const walk = pageX - startX.current;
     scrollRef.current.scrollLeft = scrollLeft.current - walk;
   };
 
   const onUp = () => {
     isDragging.current = false;
-    startAuto();
+    // 드래그 후 3초 뒤에 자동 슬라이드 재시작
+    setTimeout(() => startAuto(), 3000);
   };
 
   return (
     <div
       ref={scrollRef}
       className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide cursor-grab active:cursor-grabbing"
-      style={{ scrollSnapType: "x mandatory" }}
+      style={{ scrollSnapType: "x proximity" }}
       onMouseDown={onDown}
       onMouseMove={onMove}
       onMouseUp={onUp}
