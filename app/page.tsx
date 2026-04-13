@@ -306,7 +306,7 @@ export default function HomePage() {
 /*  고객 평가 자동 슬라이드                         */
 /* ═══════════════════════════════════════════ */
 
-function ReviewAutoSlider({ reviews }: { reviews: typeof REVIEWS }) {
+function ReviewAutoSlider({ reviews }: { reviews: typeof DEFAULT_REVIEWS }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isDragging = useRef(false);
