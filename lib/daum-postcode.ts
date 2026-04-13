@@ -86,10 +86,42 @@ export function openPostcode(onComplete: (addr: string) => void) {
 
       if (data.documents && data.documents.length > 0) {
         const doc = data.documents[0];
-        const addr = doc.road_address?.address_name || doc.address?.address_name || "";
-        if (addr) {
-          onComplete(addr);
-          document.body.removeChild(overlay);
+        // 도로명에서 번지 제거 → 도로명까지만 (GPS 오차 감안)
+        const roadAddr = doc.road_address?.address_name || "";
+        const jibunAddr = doc.address?.address_name || "";
+
+        // 도로명: "경남 창원시 의창구 동곡로 1" → "경남 창원시 의창구 동곡로" (번호 제거)
+        // 지번: "경남 창원시 의창구 북면 무동리 147-2" → "경남 창원시 의창구 북면" (동/리까지)
+        let searchKeyword = "";
+        if (roadAddr) {
+          // 마지막 숫자(번호) 부분 제거 → 도로명까지만
+          searchKeyword = roadAddr.replace(/\s+\d[\d-]*$/, "");
+        } else if (jibunAddr) {
+          // 동/리 까지만 (번지 제거)
+          searchKeyword = jibunAddr.replace(/\s+\d[\d-]*$/, "");
+        }
+
+        if (searchKeyword) {
+          // 카카오 주소 검색 입력란에 자동 입력 → 사용자가 세부 주소 선택
+          const searchInput = embedWrap.querySelector("input") as HTMLInputElement | null;
+          if (searchInput) {
+            // input에 값 설정하고 검색 트리거
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+            nativeInputValueSetter?.call(searchInput, searchKeyword);
+            searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+            // 검색 버튼 클릭
+            setTimeout(() => {
+              const searchBtn = embedWrap.querySelector("button") as HTMLButtonElement | null;
+              if (searchBtn) searchBtn.click();
+            }, 200);
+          }
+
+          locBtn.innerHTML = '✅ ' + searchKeyword;
+          locBtn.style.background = "#e8f5e9";
+          locBtn.style.borderColor = "#4caf50";
+          locBtn.style.color = "#2e7d32";
+          locBtn.style.pointerEvents = "auto";
+          locBtn.style.opacity = "1";
           return;
         }
       }
