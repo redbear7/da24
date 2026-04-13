@@ -150,6 +150,66 @@ FOR EACH ROW
 EXECUTE FUNCTION update_chat_room_last_message();
 
 -- ============================================
+-- 5. 카운터 트리거 (favorite_count, chat_count)
+-- ============================================
+
+-- favorites INSERT/DELETE → products.favorite_count 동기화
+CREATE OR REPLACE FUNCTION sync_favorite_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE products SET favorite_count = favorite_count + 1 WHERE id = NEW.product_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE products SET favorite_count = GREATEST(favorite_count - 1, 0) WHERE id = OLD.product_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_favorites_count ON favorites;
+CREATE TRIGGER trg_favorites_count
+AFTER INSERT OR DELETE ON favorites
+FOR EACH ROW
+EXECUTE FUNCTION sync_favorite_count();
+
+-- chat_rooms INSERT → products.chat_count 증가
+CREATE OR REPLACE FUNCTION sync_chat_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE products SET chat_count = chat_count + 1 WHERE id = NEW.product_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_chat_rooms_count ON chat_rooms;
+CREATE TRIGGER trg_chat_rooms_count
+AFTER INSERT ON chat_rooms
+FOR EACH ROW
+EXECUTE FUNCTION sync_chat_count();
+
+-- user_neighborhoods 최대 2개 제약 (트리거)
+CREATE OR REPLACE FUNCTION enforce_user_neighborhood_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+  cnt INT;
+BEGIN
+  SELECT COUNT(*) INTO cnt FROM user_neighborhoods WHERE user_id = NEW.user_id;
+  IF cnt >= 2 THEN
+    RAISE EXCEPTION '동네는 최대 2개까지 등록할 수 있어요.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_user_neighborhood_limit ON user_neighborhoods;
+CREATE TRIGGER trg_user_neighborhood_limit
+BEFORE INSERT ON user_neighborhoods
+FOR EACH ROW
+EXECUTE FUNCTION enforce_user_neighborhood_limit();
+
+-- ============================================
 -- Row Level Security
 -- ============================================
 ALTER TABLE profiles              ENABLE ROW LEVEL SECURITY;

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import ImageGallery from "@/components/ImageGallery";
+import FavoriteButton from "@/components/FavoriteButton";
 import { formatPrice, formatRelativeTime } from "@/lib/utils";
 
 interface Props {
@@ -13,7 +15,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const { data: product } = await supabase
     .from("products")
-    .select("*, seller:profiles!seller_id(id, nickname, avatar_url, manner_temp), images:product_images(url, sort_order), neighborhood:neighborhoods(dong, full_name)")
+    .select(
+      "*, seller:profiles!seller_id(id, nickname, avatar_url, manner_temp), images:product_images(url, sort_order), neighborhood:neighborhoods(dong, full_name)"
+    )
     .eq("id", id)
     .single();
 
@@ -25,19 +29,22 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const isOwner = user?.id === product.seller_id;
 
+  // 관심 여부
+  let favorited = false;
+  if (user) {
+    const { data: fav } = await supabase
+      .from("favorites")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .eq("product_id", id)
+      .maybeSingle();
+    favorited = !!fav;
+  }
+
   return (
     <main className="pb-24">
       {/* 이미지 갤러리 */}
-      <div className="aspect-square w-full bg-muted">
-        {product.images?.[0]?.url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.images[0].url}
-            alt={product.title}
-            className="w-full h-full object-cover"
-          />
-        )}
-      </div>
+      <ImageGallery images={product.images ?? []} alt={product.title} />
 
       {/* 판매자 */}
       <section className="flex items-center gap-3 px-4 py-4 border-b border-border">
@@ -63,14 +70,23 @@ export default async function ProductDetailPage({ params }: Props) {
           {product.description}
         </p>
         <p className="mt-4 text-[12px] text-text-muted">
-          관심 {product.favorite_count} · 조회 {product.view_count}
+          관심 {product.favorite_count} · 채팅 {product.chat_count} · 조회 {product.view_count}
         </p>
       </section>
 
       {/* 하단 가격/채팅 바 */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[640px] bg-white border-t border-border">
-        <div className="flex items-center justify-between px-4 h-16 safe-bottom">
-          <p className="text-[17px] font-bold">{formatPrice(product.price)}</p>
+        <div className="flex items-center gap-3 px-4 h-16 safe-bottom">
+          {!isOwner && user && (
+            <FavoriteButton
+              productId={product.id}
+              initialFavorited={favorited}
+              initialCount={product.favorite_count}
+            />
+          )}
+          <p className="flex-1 text-[17px] font-bold">
+            {formatPrice(product.price)}
+          </p>
           {isOwner ? (
             <Link
               href={`/products/${product.id}/edit`}
