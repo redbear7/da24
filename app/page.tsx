@@ -396,7 +396,7 @@ function ReviewAutoSlider({ reviews }: { reviews: typeof DEFAULT_REVIEWS }) {
 
 import { openPostcode } from "@/lib/daum-postcode";
 
-const FLOOR_OPTS = ["1층", "2~5층", "6~10층", "11~20층", "21층 이상", "엘리베이터 없음"];
+const FLOOR_OPTS = ["1층", "2~5층", "6~10층", "11~20층", "21층 이상"];
 
 const MOVE_METHODS = [
   { key: "full", title: "포장이사", desc: "업체에게 모든 걸 맡기세요!", steps: ["포장", "운반", "이동", "운반", "뒷정리"], highlight: [0, 1, 2, 3, 4] },
@@ -435,9 +435,11 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
   const [fromAddr, setFromAddr] = useState("");
   const [fromDetail, setFromDetail] = useState("");
   const [fromFloor, setFromFloor] = useState("");
+  const [fromNoElevator, setFromNoElevator] = useState(false);
   const [toAddr, setToAddr] = useState("");
   const [toDetail, setToDetail] = useState("");
   const [toFloor, setToFloor] = useState("");
+  const [toNoElevator, setToNoElevator] = useState(false);
   const [moveDate, setMoveDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -456,7 +458,7 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
           planType: "moving",
           provider: move.type,
           planName: move.title,
-          address: `출발: ${fromAddr} ${fromDetail} (${fromFloor}) → 도착: ${toAddr} ${toDetail} (${toFloor})`,
+          address: `출발: ${fromAddr} ${fromDetail} (${fromFloor}${fromNoElevator ? ", 엘리베이터 없음" : ""}) → 도착: ${toAddr} ${toDetail} (${toFloor}${toNoElevator ? ", 엘리베이터 없음" : ""})`,
           memo: `이사 날짜: ${moveDate}`,
         }),
       });
@@ -721,6 +723,12 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
                           {f}
                         </button>
                       ))}
+                      <button
+                        onClick={() => setFromNoElevator(!fromNoElevator)}
+                        className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
+                      >
+                        엘리베이터 없음
+                      </button>
                     </div>
                   </div>
                 )}
@@ -781,6 +789,12 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
                           {f}
                         </button>
                       ))}
+                      <button
+                        onClick={() => setToNoElevator(!toNoElevator)}
+                        className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
+                      >
+                        엘리베이터 없음
+                      </button>
                     </div>
                   </div>
                 )}
@@ -804,11 +818,11 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
                 <div className="bg-muted rounded-xl p-4 space-y-2 text-[13px]">
                   <div className="flex gap-2">
                     <span className="text-primary font-bold shrink-0">출발</span>
-                    <span className="text-foreground">{fromAddr} {fromDetail} {fromFloor && `(${fromFloor})`}</span>
+                    <span className="text-foreground">{fromAddr} {fromDetail} {fromFloor && `(${fromFloor})`}{fromNoElevator && " · 엘리베이터 없음"}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-accent font-bold shrink-0">도착</span>
-                    <span className="text-foreground">{toAddr} {toDetail} {toFloor && `(${toFloor})`}</span>
+                    <span className="text-foreground">{toAddr} {toDetail} {toFloor && `(${toFloor})`}{toNoElevator && " · 엘리베이터 없음"}</span>
                   </div>
                 </div>
 
