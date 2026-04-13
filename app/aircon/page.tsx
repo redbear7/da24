@@ -3,9 +3,6 @@
 import { useState } from "react";
 import {
   AirVent,
-  Wrench,
-  RotateCcw,
-  Trash2,
   MapPin,
   CalendarDays,
   User,
@@ -18,6 +15,7 @@ import {
   Shield,
   Clock,
   Award,
+  Zap,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,91 +24,58 @@ import Footer from "@/components/Footer";
 // Types & Constants
 // ─────────────────────────────────────────────
 
-type ServiceType = "install" | "repair" | "clean" | "remove";
-type AirconType = "wall" | "standing" | "ceiling" | "multi";
-
-const SERVICE_TYPES: { key: ServiceType; label: string; desc: string; icon: React.ElementType }[] = [
-  { key: "install", label: "설치", desc: "신규 에어컨 설치", icon: Wrench },
-  { key: "repair", label: "수리", desc: "고장 수리·점검", icon: RotateCcw },
-  { key: "clean", label: "청소", desc: "내부 세척·살균", icon: AirVent },
-  { key: "remove", label: "철거", desc: "기존 에어컨 제거", icon: Trash2 },
-];
+type AirconType = "wall" | "standing" | "system" | "twoinone";
+type InstallType = "new" | "move";
 
 const AIRCON_TYPES: { key: AirconType; label: string; desc: string }[] = [
   { key: "wall", label: "벽걸이형", desc: "가정용 일반형" },
   { key: "standing", label: "스탠드형", desc: "대형 원룸·거실" },
-  { key: "ceiling", label: "천장형", desc: "업소·사무실용" },
-  { key: "multi", label: "멀티형", desc: "2대 이상 연결" },
+  { key: "system", label: "시스템형", desc: "업소·사무실용" },
+  { key: "twoinone", label: "2in1형", desc: "실내기 2대 연결" },
 ];
 
-const PRICE_TABLE: Record<ServiceType, Record<AirconType, string>> = {
-  install: { wall: "80,000원~", standing: "120,000원~", ceiling: "200,000원~", multi: "문의" },
-  repair:  { wall: "50,000원~", standing: "70,000원~",  ceiling: "100,000원~", multi: "문의" },
-  clean:   { wall: "60,000원~", standing: "90,000원~",  ceiling: "130,000원~", multi: "문의" },
-  remove:  { wall: "40,000원~", standing: "60,000원~",  ceiling: "90,000원~",  multi: "문의" },
+const INSTALL_TYPES: { key: InstallType; label: string; desc: string }[] = [
+  { key: "new", label: "신규설치", desc: "처음 설치하는 경우" },
+  { key: "move", label: "이전설치", desc: "기존 에어컨 이전" },
+];
+
+// 가격 테이블: [신규설치, 이전설치]
+const PRICE_TABLE: Record<AirconType, Record<InstallType, string>> = {
+  wall:     { new: "80,000원~",  move: "100,000원~" },
+  standing: { new: "120,000원~", move: "150,000원~" },
+  system:   { new: "200,000원~", move: "250,000원~" },
+  twoinone: { new: "문의",       move: "문의" },
 };
+
+const OUTDOOR_UNIT_FEE = "30,000원~";
 
 const REVIEWS = [
   {
     name: "최*영",
     score: 5,
     date: "2026.03.22",
-    type: "설치",
+    type: "신규설치",
     body: "벽걸이 에어컨 설치인데 배관 구멍부터 마감까지 정말 깔끔하게 해주셨어요. 가격도 합리적이었습니다!",
   },
   {
     name: "홍*동",
     score: 5,
     date: "2026.03.15",
-    type: "청소",
-    body: "스탠드형 에어컨 청소인데 곰팡이 냄새가 완전히 없어졌어요. 전문 장비로 꼼꼼히 세척해주셨습니다.",
+    type: "이전설치",
+    body: "스탠드형 에어컨 이전 설치인데 꼼꼼하게 작업해주셨어요. 시간도 딱 맞게 오셔서 너무 좋았습니다.",
   },
   {
     name: "송*아",
     score: 4,
     date: "2026.02.20",
-    type: "수리",
-    body: "냉각이 안 되는 문제 빠르게 진단해서 수리해주셨어요. 당일 방문해주셔서 정말 도움이 됐습니다.",
+    type: "신규설치",
+    body: "시스템 에어컨 신규 설치인데 깔끔하게 마감 처리까지 해주셨습니다. 당일 방문해주셔서 정말 도움이 됐어요.",
   },
 ];
 
 // ─────────────────────────────────────────────
 // Sub-components
 // ─────────────────────────────────────────────
-
-function ServiceTypeSelector({
-  selected,
-  onChange,
-}: {
-  selected: ServiceType;
-  onChange: (t: ServiceType) => void;
-}) {
-  return (
-    <section className="max-w-[640px] mx-auto px-5 pt-6 pb-4">
-      <h2 className="text-[16px] font-bold text-foreground mb-3">서비스 유형</h2>
-      <div className="grid grid-cols-4 border border-border rounded-xl overflow-hidden">
-        {SERVICE_TYPES.map(({ key, label, desc, icon: Icon }, i) => {
-          const isActive = selected === key;
-          return (
-            <button
-              key={key}
-              onClick={() => onChange(key)}
-              className={[
-                "py-3 text-center transition-colors",
-                i > 0 ? "border-l border-border" : "",
-                isActive ? "bg-card text-primary" : "bg-muted text-muted-foreground",
-              ].join(" ")}
-            >
-              <Icon className={`w-5 h-5 mx-auto mb-1 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-              <span className="block text-[14px] font-semibold">{label}</span>
-              <span className="block text-[11px] mt-0.5 opacity-70">{desc}</span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
 
 function AirconTypeSelector({
   selected,
@@ -121,7 +86,7 @@ function AirconTypeSelector({
 }) {
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-4">
-      <h2 className="text-[16px] font-bold text-foreground mb-3">에어컨 종류</h2>
+      <h2 className="text-[16px] font-bold text-foreground mb-3">에어컨 유형</h2>
       <div className="grid grid-cols-2 gap-3">
         {AIRCON_TYPES.map(({ key, label, desc }) => {
           const isActive = selected === key;
@@ -131,10 +96,12 @@ function AirconTypeSelector({
               onClick={() => onChange(key)}
               className={[
                 "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
-                isActive ? "border-primary bg-secondary/50 shadow-sm" : "border-border bg-card hover:border-primary/20",
+                isActive
+                  ? "border-primary bg-secondary/50 shadow-sm"
+                  : "border-border bg-card hover:border-primary/20",
               ].join(" ")}
             >
-              <AirVent className={`w-6 h-6 shrink-0 ${isActive ? "text-primary" : "text-text-muted"}`} />
+              <AirVent className={`w-6 h-6 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
               <div>
                 <p className="text-[15px] font-bold text-foreground">{label}</p>
                 <p className="text-[12px] text-text-secondary">{desc}</p>
@@ -147,33 +114,117 @@ function AirconTypeSelector({
   );
 }
 
-function PriceEstimateBox({
-  serviceType,
-  airconType,
+function InstallTypeSelector({
+  selected,
+  onChange,
 }: {
-  serviceType: ServiceType;
-  airconType: AirconType | null;
+  selected: InstallType;
+  onChange: (t: InstallType) => void;
 }) {
-  const serviceLabel = SERVICE_TYPES.find((s) => s.key === serviceType)?.label ?? "";
+  return (
+    <section className="max-w-[640px] mx-auto px-5 pb-4">
+      <h2 className="text-[16px] font-bold text-foreground mb-3">설치 유형</h2>
+      <div className="grid grid-cols-2 border border-border rounded-xl overflow-hidden">
+        {INSTALL_TYPES.map(({ key, label, desc }, i) => {
+          const isActive = selected === key;
+          return (
+            <button
+              key={key}
+              onClick={() => onChange(key)}
+              className={[
+                "py-3.5 px-4 text-center transition-colors",
+                i > 0 ? "border-l border-border" : "",
+                isActive ? "bg-card text-primary" : "bg-muted text-muted-foreground",
+              ].join(" ")}
+            >
+              <span className="block text-[15px] font-semibold">{label}</span>
+              <span className="block text-[11px] mt-0.5 opacity-70">{desc}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function OutdoorUnitToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <section className="max-w-[640px] mx-auto px-5 pb-4">
+      <h2 className="text-[16px] font-bold text-foreground mb-3">실외기 설치</h2>
+      <button
+        onClick={() => onChange(!checked)}
+        className={[
+          "w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all",
+          checked
+            ? "border-primary bg-secondary/50"
+            : "border-border bg-card hover:border-primary/20",
+        ].join(" ")}
+      >
+        <div className="flex items-center gap-3">
+          <Zap className={`w-5 h-5 ${checked ? "text-primary" : "text-muted-foreground"}`} />
+          <div className="text-left">
+            <p className="text-[15px] font-bold text-foreground">실외기 설치 필요</p>
+            <p className="text-[12px] text-text-secondary">실외기 브라켓 고정·배관 연결 포함</p>
+          </div>
+        </div>
+        <div
+          className={[
+            "w-11 h-6 rounded-full relative transition-colors",
+            checked ? "bg-primary" : "bg-border",
+          ].join(" ")}
+        >
+          <span
+            className={[
+              "absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all",
+              checked ? "left-6" : "left-1",
+            ].join(" ")}
+          />
+        </div>
+      </button>
+      {checked && (
+        <p className="text-[12px] text-text-secondary mt-2 ml-1">
+          실외기 설치 추가 요금: <span className="font-semibold text-foreground">{OUTDOOR_UNIT_FEE}</span> (현장 상황에 따라 달라질 수 있음)
+        </p>
+      )}
+    </section>
+  );
+}
+
+function PriceEstimateBox({
+  airconType,
+  installType,
+  outdoorUnit,
+}: {
+  airconType: AirconType | null;
+  installType: InstallType;
+  outdoorUnit: boolean;
+}) {
   const airconLabel = AIRCON_TYPES.find((a) => a.key === airconType)?.label ?? "";
+  const installLabel = INSTALL_TYPES.find((t) => t.key === installType)?.label ?? "";
 
   if (!airconType) {
     return (
       <section className="max-w-[640px] mx-auto px-5 pb-6">
         <div className="bg-secondary rounded-xl px-5 py-4 text-center">
-          <p className="text-[14px] text-text-secondary">에어컨 종류를 선택하면 예상 견적을 안내해 드려요</p>
+          <p className="text-[14px] text-text-secondary">에어컨 유형을 선택하면 예상 견적을 안내해 드려요</p>
         </div>
       </section>
     );
   }
 
-  const price = PRICE_TABLE[serviceType][airconType];
+  const price = PRICE_TABLE[airconType][installType];
 
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
       <div className="bg-secondary rounded-xl px-5 py-4">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[14px] text-text-secondary">{serviceLabel} · {airconLabel}</span>
+          <span className="text-[14px] text-text-secondary">{airconLabel} · {installLabel}</span>
           <span className="text-[11px] text-text-muted">VAT 포함</span>
         </div>
         {price === "문의" ? (
@@ -185,6 +236,11 @@ function PriceEstimateBox({
             <span className="text-[15px] font-semibold text-foreground mb-0.5">원~</span>
           </div>
         )}
+        {outdoorUnit && (
+          <p className="text-[12px] text-text-secondary mt-2">
+            + 실외기 설치: <span className="font-semibold text-foreground">{OUTDOOR_UNIT_FEE}</span>
+          </p>
+        )}
         <p className="text-[11px] text-text-muted mt-2">
           * 현장 상황에 따라 견적이 달라질 수 있습니다.
         </p>
@@ -193,22 +249,26 @@ function PriceEstimateBox({
   );
 }
 
-function PriceGuideSection({ serviceType }: { serviceType: ServiceType }) {
-  const serviceLabel = SERVICE_TYPES.find((s) => s.key === serviceType)?.label ?? "";
+function PriceGuideSection({ installType }: { installType: InstallType }) {
+  const installLabel = INSTALL_TYPES.find((t) => t.key === installType)?.label ?? "";
 
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-6">
       <h2 className="text-[16px] font-bold text-foreground mb-3">가격 안내</h2>
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-4 py-3 bg-muted border-b border-border">
-          <p className="text-[13px] font-semibold text-text-secondary">{serviceLabel} 기준 요금표 (VAT 포함)</p>
+          <p className="text-[13px] font-semibold text-text-secondary">{installLabel} 기준 요금표 (VAT 포함)</p>
         </div>
         {AIRCON_TYPES.map(({ key, label }) => (
           <div key={key} className="flex items-center justify-between px-4 py-3 border-b border-border-subtle last:border-b-0">
             <span className="text-[14px] text-foreground">{label}</span>
-            <span className="text-[14px] font-semibold text-foreground">{PRICE_TABLE[serviceType][key]}</span>
+            <span className="text-[14px] font-semibold text-foreground">{PRICE_TABLE[key][installType]}</span>
           </div>
         ))}
+        <div className="flex items-center justify-between px-4 py-3 bg-secondary/30">
+          <span className="text-[14px] text-foreground">실외기 설치 (별도)</span>
+          <span className="text-[14px] font-semibold text-foreground">{OUTDOOR_UNIT_FEE}</span>
+        </div>
       </div>
       <p className="text-[11px] text-text-muted mt-2 ml-1">
         * 현장 상태, 배관 길이 등에 따라 요금이 달라질 수 있습니다.
@@ -315,15 +375,17 @@ function ReviewsSection() {
 function AirconConsultationForm({
   isOpen,
   onClose,
-  serviceType,
   airconType,
+  installType,
+  outdoorUnit,
   date,
   address,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  serviceType: ServiceType;
   airconType: AirconType | null;
+  installType: InstallType;
+  outdoorUnit: boolean;
   date: string;
   address: string;
 }) {
@@ -333,8 +395,8 @@ function AirconConsultationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const serviceLabel = SERVICE_TYPES.find((s) => s.key === serviceType)?.label ?? "";
   const airconLabel = AIRCON_TYPES.find((a) => a.key === airconType)?.label ?? "";
+  const installLabel = INSTALL_TYPES.find((t) => t.key === installType)?.label ?? "";
 
   const formatPhone = (val: string) => {
     const nums = val.replace(/\D/g, "").slice(0, 11);
@@ -377,9 +439,11 @@ function AirconConsultationForm({
         </div>
 
         <div className="mx-5 mb-4 bg-secondary rounded-xl px-4 py-3">
-          <p className="text-[13px] font-semibold text-primary mb-1">{serviceLabel}</p>
+          <p className="text-[13px] font-semibold text-primary mb-1">에어컨 설치</p>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-text-secondary">
             {airconLabel && <span>· {airconLabel}</span>}
+            <span>· {installLabel}</span>
+            {outdoorUnit && <span>· 실외기 설치</span>}
             {date && <span>· {date.replace(/-/g, ".")}</span>}
             {address && <span>· {address.slice(0, 15)}{address.length > 15 ? "..." : ""}</span>}
           </div>
@@ -412,7 +476,7 @@ function AirconConsultationForm({
                 <MessageSquare className="w-4 h-4 text-muted-foreground" />
                 요청사항
               </span>
-              <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="에어컨 모델명, 증상 등 알려주세요" rows={3} className={`${inputCls} resize-none`} />
+              <textarea value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="에어컨 모델명, 설치 환경 등 알려주세요" rows={3} className={`${inputCls} resize-none`} />
             </label>
             <button
               type="submit"
@@ -437,14 +501,14 @@ function AirconConsultationForm({
 
 function AirconBottomBar({
   onConsultClick,
-  serviceType,
   airconType,
+  installType,
 }: {
   onConsultClick: () => void;
-  serviceType: ServiceType;
   airconType: AirconType | null;
+  installType: InstallType;
 }) {
-  const price = airconType ? PRICE_TABLE[serviceType][airconType] : null;
+  const price = airconType ? PRICE_TABLE[airconType][installType] : null;
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-bottom-bar-bg safe-bottom">
       <div className="max-w-[640px] mx-auto px-5 pt-4 pb-3">
@@ -453,7 +517,7 @@ function AirconBottomBar({
           {price ? (
             <span className="text-[20px] font-extrabold text-bottom-bar-text">{price}</span>
           ) : (
-            <span className="text-[16px] font-bold text-bottom-bar-text/60">종류를 선택해 주세요</span>
+            <span className="text-[16px] font-bold text-bottom-bar-text/60">유형을 선택해 주세요</span>
           )}
         </div>
         <button
@@ -472,8 +536,9 @@ function AirconBottomBar({
 // ─────────────────────────────────────────────
 
 export default function AirconPage() {
-  const [serviceType, setServiceType] = useState<ServiceType>("install");
   const [airconType, setAirconType] = useState<AirconType | null>(null);
+  const [installType, setInstallType] = useState<InstallType>("new");
+  const [outdoorUnit, setOutdoorUnit] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [address, setAddress] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -484,21 +549,15 @@ export default function AirconPage() {
 
       {/* Hero */}
       <section className="max-w-[640px] mx-auto px-5 pt-6 pb-5">
-        <p className="text-[13px] font-semibold text-primary mb-2">설치 · 수리 · 청소 · 철거</p>
+        <p className="text-[13px] font-semibold text-primary mb-2">에어컨 설치 전문</p>
         <h1 className="text-[24px] font-bold text-foreground leading-snug mb-2">
-          에어컨, 전문가에게<br />
+          에어컨 설치, 전문가에게<br />
           <span className="text-primary">믿고 맡기세요</span>
         </h1>
         <p className="text-[14px] text-text-secondary leading-relaxed">
-          공조 전문 자격 보유 기사가 투명한 가격으로 빠르게 서비스합니다. 당일 방문도 가능합니다.
+          공조 전문 자격 보유 기사가 투명한 가격으로 빠르게 설치합니다. 당일 방문도 가능합니다.
         </p>
       </section>
-
-      <div className="max-w-[640px] mx-auto px-5">
-        <hr className="border-border" />
-      </div>
-
-      <ServiceTypeSelector selected={serviceType} onChange={(t) => { setServiceType(t); setAirconType(null); }} />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
@@ -514,7 +573,7 @@ export default function AirconPage() {
 
       <div className="pt-4" />
 
-      <PriceEstimateBox serviceType={serviceType} airconType={airconType} />
+      <InstallTypeSelector selected={installType} onChange={setInstallType} />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
@@ -522,7 +581,23 @@ export default function AirconPage() {
 
       <div className="pt-4" />
 
-      <PriceGuideSection serviceType={serviceType} />
+      <OutdoorUnitToggle checked={outdoorUnit} onChange={setOutdoorUnit} />
+
+      <div className="max-w-[640px] mx-auto px-5">
+        <hr className="border-border" />
+      </div>
+
+      <div className="pt-4" />
+
+      <PriceEstimateBox airconType={airconType} installType={installType} outdoorUnit={outdoorUnit} />
+
+      <div className="max-w-[640px] mx-auto px-5">
+        <hr className="border-border" />
+      </div>
+
+      <div className="pt-4" />
+
+      <PriceGuideSection installType={installType} />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
@@ -555,13 +630,14 @@ export default function AirconPage() {
 
       <Footer />
 
-      <AirconBottomBar onConsultClick={() => setIsFormOpen(true)} serviceType={serviceType} airconType={airconType} />
+      <AirconBottomBar onConsultClick={() => setIsFormOpen(true)} airconType={airconType} installType={installType} />
 
       <AirconConsultationForm
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        serviceType={serviceType}
         airconType={airconType}
+        installType={installType}
+        outdoorUnit={outdoorUnit}
         date={selectedDate}
         address={address}
       />
