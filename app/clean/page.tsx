@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { openPostcode } from "@/lib/daum-postcode";
 import {
   X,
   Phone,
   User,
   CalendarDays,
+  MapPin,
   MessageSquare,
   Loader2,
   CheckCircle,
@@ -49,6 +51,7 @@ const SIZE_OPTIONS = [
 ];
 
 const ROOM_OPTIONS = ["원룸/1K", "1.5룸", "2룸", "3룸", "4룸 이상"];
+const BATHROOM_OPTIONS = ["1개", "2개", "3개 이상"];
 
 // 가격표 (단위: 원)
 const PRICE_TABLE: Record<CleanType, number[]> = {
@@ -150,7 +153,7 @@ function CleanTypeSelector({
 }
 
 // ─────────────────────────────────────────────
-// Size & Room Selector
+// Size, Room & Bathroom Selector
 // ─────────────────────────────────────────────
 
 function SizeRoomSelector({
@@ -158,15 +161,19 @@ function SizeRoomSelector({
   onSizeChange,
   selectedRoom,
   onRoomChange,
+  selectedBathroom,
+  onBathroomChange,
 }: {
   selectedSize: number | null;
   onSizeChange: (i: number) => void;
   selectedRoom: number | null;
   onRoomChange: (i: number) => void;
+  selectedBathroom: number | null;
+  onBathroomChange: (i: number) => void;
 }) {
   return (
     <section className="max-w-[640px] mx-auto px-5 pb-4">
-      <h2 className="text-[16px] font-bold text-foreground mb-3">평수 / 방 수 입력</h2>
+      <h2 className="text-[16px] font-bold text-foreground mb-3">평수 / 방·화장실 수</h2>
 
       {/* 평수 */}
       <div className="mb-4">
@@ -190,7 +197,7 @@ function SizeRoomSelector({
       </div>
 
       {/* 방 수 */}
-      <div>
+      <div className="mb-4">
         <p className="text-[13px] text-text-secondary mb-2">방 수를 선택해 주세요</p>
         <div className="grid grid-cols-5 gap-2">
           {ROOM_OPTIONS.map((r, i) => (
@@ -205,6 +212,27 @@ function SizeRoomSelector({
               ].join(" ")}
             >
               {r}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 화장실 수 */}
+      <div>
+        <p className="text-[13px] text-text-secondary mb-2">화장실 수를 선택해 주세요</p>
+        <div className="grid grid-cols-3 gap-2">
+          {BATHROOM_OPTIONS.map((b, i) => (
+            <button
+              key={b}
+              onClick={() => onBathroomChange(i)}
+              className={[
+                "py-3 rounded-xl border-2 text-[13px] font-medium transition-all text-center",
+                selectedBathroom === i
+                  ? "border-primary bg-secondary text-primary"
+                  : "border-border bg-card text-foreground hover:border-primary/40",
+              ].join(" ")}
+            >
+              {b}
             </button>
           ))}
         </div>
@@ -246,6 +274,60 @@ function DateSelector({
           </span>
         </p>
       )}
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Address Section (카카오 주소 검색)
+// ─────────────────────────────────────────────
+
+function AddressSection({
+  address,
+  addressDetail,
+  onAddressChange,
+  onAddressDetailChange,
+}: {
+  address: string;
+  addressDetail: string;
+  onAddressChange: (v: string) => void;
+  onAddressDetailChange: (v: string) => void;
+}) {
+  const inputBase =
+    "w-full px-3 py-2.5 bg-muted border border-border rounded-lg text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all";
+
+  return (
+    <section className="max-w-[640px] mx-auto px-5 pb-6">
+      <h2 className="text-[16px] font-bold text-foreground mb-3">청소 주소</h2>
+      <div className="bg-card border border-border rounded-xl p-4">
+        <p className="text-[12px] font-semibold text-primary mb-2 flex items-center gap-1">
+          <MapPin className="w-3.5 h-3.5" /> 주소 입력
+        </p>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            value={address}
+            readOnly
+            onClick={() => openPostcode(onAddressChange)}
+            placeholder="주소 검색을 눌러주세요"
+            className={`${inputBase} flex-1 cursor-pointer`}
+          />
+          <button
+            type="button"
+            onClick={() => openPostcode(onAddressChange)}
+            className="px-4 py-2.5 bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all shrink-0"
+          >
+            주소 검색
+          </button>
+        </div>
+        <input
+          type="text"
+          value={addressDetail}
+          onChange={(e) => onAddressDetailChange(e.target.value)}
+          placeholder="상세 주소 (동/호수)"
+          className={inputBase}
+        />
+      </div>
     </section>
   );
 }
@@ -514,18 +596,21 @@ function CleanConsultationForm({
   cleanType,
   size,
   room,
+  bathroom,
   date,
+  address,
 }: {
   isOpen: boolean;
   onClose: () => void;
   cleanType: CleanType;
   size: string | null;
   room: string | null;
+  bathroom: string | null;
   date: string;
+  address: string;
 }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -553,8 +638,9 @@ function CleanConsultationForm({
           cleanType,
           size,
           room,
+          bathroom,
           date,
-          address: address.trim() || undefined,
+          address: address || undefined,
           memo: memo.trim() || undefined,
         }),
       });
@@ -568,7 +654,6 @@ function CleanConsultationForm({
       onClose();
       setName("");
       setPhone("");
-      setAddress("");
       setMemo("");
     }, 2000);
   };
@@ -604,7 +689,9 @@ function CleanConsultationForm({
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[12px] text-text-secondary">
             {size && <span>· {size}</span>}
             {room && <span>· {room}</span>}
+            {bathroom && <span>· 화장실 {bathroom}</span>}
             {date && <span>· 희망일 {date.replace(/-/g, ".")}</span>}
+            {address && <span>· {address.slice(0, 20)}{address.length > 20 ? "..." : ""}</span>}
           </div>
         </div>
 
@@ -644,20 +731,6 @@ function CleanConsultationForm({
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
                 placeholder="010-1234-5678"
                 required
-                className={inputCls}
-              />
-            </label>
-
-            <label className="block mb-4">
-              <span className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
-                <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                청소 주소
-              </span>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="서울시 강남구 테헤란로 123"
                 className={inputCls}
               />
             </label>
@@ -709,7 +782,10 @@ export default function CleanPage() {
   const [cleanType, setCleanType] = useState<CleanType>("movein");
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
+  const [selectedBathroom, setSelectedBathroom] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [address, setAddress] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const estimatedPrice = getEstimatedPrice(cleanType, selectedSize);
@@ -724,6 +800,8 @@ export default function CleanPage() {
     setCleanType(t);
     setSelectedSize(null);
   };
+
+  const fullAddress = addressDetail ? `${address} ${addressDetail}`.trim() : address;
 
   return (
     <div className="min-h-screen bg-background">
@@ -748,6 +826,8 @@ export default function CleanPage() {
         onSizeChange={setSelectedSize}
         selectedRoom={selectedRoom}
         onRoomChange={setSelectedRoom}
+        selectedBathroom={selectedBathroom}
+        onBathroomChange={setSelectedBathroom}
       />
 
       <div className="max-w-[640px] mx-auto px-5">
@@ -757,6 +837,19 @@ export default function CleanPage() {
       <div className="pt-4" />
 
       <DateSelector selectedDate={selectedDate} onChange={setSelectedDate} />
+
+      <div className="max-w-[640px] mx-auto px-5">
+        <hr className="border-border" />
+      </div>
+
+      <div className="pt-4" />
+
+      <AddressSection
+        address={address}
+        addressDetail={addressDetail}
+        onAddressChange={setAddress}
+        onAddressDetailChange={setAddressDetail}
+      />
 
       <div className="max-w-[640px] mx-auto px-5">
         <hr className="border-border" />
@@ -803,7 +896,9 @@ export default function CleanPage() {
         cleanType={cleanType}
         size={selectedSize !== null ? SIZE_OPTIONS[selectedSize] : null}
         room={selectedRoom !== null ? ROOM_OPTIONS[selectedRoom] : null}
+        bathroom={selectedBathroom !== null ? BATHROOM_OPTIONS[selectedBathroom] : null}
         date={selectedDate}
+        address={fullAddress}
       />
     </div>
   );
