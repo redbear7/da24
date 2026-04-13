@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { supabase } from "@/lib/supabase";
 import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
 
 /* ─── 이사 카테고리 ─── */
@@ -60,27 +61,15 @@ const SERVICES = [
   { title: "에어컨", badge: null, badgeType: null, icon: AirVent, href: "/aircon" },
 ];
 
-/* ─── 프로모 배너 ─── */
-const BANNERS = [
-  {
-    eyebrow: "이사 지원금 당첨 확률 2배!",
-    title: "인터넷 가입 지원금 추가 지급!",
-    bg: "bg-primary",
-  },
-  {
-    eyebrow: "에어컨 설치 비가지 요금?",
-    title: "의심, 걱정 없이 끝!",
-    bg: "bg-foreground",
-  },
-  {
-    eyebrow: "780만 고객이 선택한 다이사",
-    title: "이사업체 비교의 새로운 기준",
-    bg: "bg-primary",
-  },
+/* ─── 프로모 배너 (fallback) ─── */
+const DEFAULT_BANNERS = [
+  { eyebrow: "이사 지원금 당첨 확률 2배!", title: "인터넷 가입 지원금 추가 지급!", bg: "bg-primary" },
+  { eyebrow: "에어컨 설치 비가지 요금?", title: "의심, 걱정 없이 끝!", bg: "bg-foreground" },
+  { eyebrow: "780만 고객이 선택한 다이사", title: "이사업체 비교의 새로운 기준", bg: "bg-primary" },
 ];
 
-/* ─── 고객 리뷰 (최근 5개, 창원시) ─── */
-const REVIEWS = [
+/* ─── 고객 리뷰 fallback (⛔ 수정 금지: 창원시 5개) ─── */
+const DEFAULT_REVIEWS = [
   { area: "창원시 성산구", company: "업체 한*****", rating: 5, text: "용지동에서 상남동으로 이사했는데, 사다리차 작업도 완벽했고 가격도 합리적이었습니다.", id: "591423", period: "1개월 내 이사" },
   { area: "창원시 마산합포구", company: "업체 으*****", rating: 5, text: "비 오는 날이었는데도 방수 포장까지 해주시고 정말 감동이었습니다.", id: "591332", period: "2개월 내 이사" },
   { area: "창원시 진해구", company: "업체 스****", rating: 5, text: "원룸 이사인데도 매우 친절하고 빠르게 진행해주셨어요. 1시간 만에 끝!", id: "591287", period: "1개월 내 이사" },
@@ -92,13 +81,31 @@ export default function HomePage() {
   const router = useRouter();
   const [bannerIdx, setBannerIdx] = useState(0);
   const [selectedMove, setSelectedMove] = useState<typeof MOVING_CATEGORIES[number] | null>(null);
+  const [banners, setBanners] = useState(DEFAULT_BANNERS);
+  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+
+  // Supabase에서 배너 + 리뷰 가져오기
+  useEffect(() => {
+    supabase.from("banners").select("eyebrow,title,bg_class").eq("is_active", true).order("sort_order").then(({ data }) => {
+      if (data && data.length > 0) {
+        setBanners(data.map((b: { eyebrow: string; title: string; bg_class: string }) => ({ eyebrow: b.eyebrow, title: b.title, bg: b.bg_class })));
+      }
+    });
+    supabase.from("reviews").select("name,rating,text,region,service_type,date").order("created_at", { ascending: false }).limit(5).then(({ data }) => {
+      if (data && data.length > 0) {
+        setReviews(data.map((r: { name: string; rating: number; text: string; region: string; date: string }) => ({
+          area: r.region, company: `업체 ${r.name}`, rating: r.rating, text: r.text, id: "", period: r.date,
+        })));
+      }
+    });
+  }, []);
 
   const nextBanner = useCallback(() => {
-    setBannerIdx((i) => (i + 1) % BANNERS.length);
+    setBannerIdx((i) => (i + 1) % banners.length);
   }, []);
 
   const prevBanner = useCallback(() => {
-    setBannerIdx((i) => (i - 1 + BANNERS.length) % BANNERS.length);
+    setBannerIdx((i) => (i - 1 + banners.length) % banners.length);
   }, []);
 
   useEffect(() => {
@@ -206,10 +213,10 @@ export default function HomePage() {
       {/* ─── 프로모 배너 슬라이더 ─── */}
       <section className="max-w-[640px] mx-auto px-5 pb-6">
         <div
-          className={`${BANNERS[bannerIdx].bg} rounded-2xl px-5 py-5 text-white relative overflow-hidden min-h-[88px] transition-colors duration-500`}
+          className={`${banners[bannerIdx].bg} rounded-2xl px-5 py-5 text-white relative overflow-hidden min-h-[88px] transition-colors duration-500`}
         >
-          <p className="text-[13px] text-white/70">{BANNERS[bannerIdx].eyebrow}</p>
-          <p className="text-[17px] font-bold mt-0.5 pr-16">{BANNERS[bannerIdx].title}</p>
+          <p className="text-[13px] text-white/70">{banners[bannerIdx].eyebrow}</p>
+          <p className="text-[17px] font-bold mt-0.5 pr-16">{banners[bannerIdx].title}</p>
 
           {/* 좌우 화살표 */}
           <button
@@ -229,7 +236,7 @@ export default function HomePage() {
 
           {/* 인디케이터 dots */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {BANNERS.map((_, i) => (
+            {banners.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setBannerIdx(i)}
@@ -254,7 +261,7 @@ export default function HomePage() {
             더보기 <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <ReviewAutoSlider reviews={REVIEWS} />
+        <ReviewAutoSlider reviews={reviews} />
       </section>
 
       {/* ─── 해피이사 캠페인 ─── */}
