@@ -5,7 +5,7 @@ declare global {
         oncomplete: (data: { address: string; zonecode?: string; buildingName?: string }) => void;
         width?: string;
         height?: string;
-      }) => { open: () => void; embed: (el: HTMLElement) => void };
+      }) => { open: () => void; embed: (el: HTMLElement, opts?: { q?: string; autoClose?: boolean }) => void };
     };
   }
 }
@@ -102,19 +102,20 @@ export function openPostcode(onComplete: (addr: string) => void) {
         }
 
         if (searchKeyword) {
-          // 카카오 주소 검색 입력란에 자동 입력 → 사용자가 세부 주소 선택
-          const searchInput = embedWrap.querySelector("input") as HTMLInputElement | null;
-          if (searchInput) {
-            // input에 값 설정하고 검색 트리거
-            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-            nativeInputValueSetter?.call(searchInput, searchKeyword);
-            searchInput.dispatchEvent(new Event("input", { bubbles: true }));
-            // 검색 버튼 클릭
-            setTimeout(() => {
-              const searchBtn = embedWrap.querySelector("button") as HTMLButtonElement | null;
-              if (searchBtn) searchBtn.click();
-            }, 200);
-          }
+          // 기존 embed 제거 → 도로명 키워드로 새 Postcode 재생성 (자동 검색)
+          embedWrap.innerHTML = "";
+
+          new window.daum.Postcode({
+            oncomplete: (pdata) => {
+              const full = pdata.buildingName
+                ? `${pdata.address} (${pdata.buildingName})`
+                : pdata.address;
+              onComplete(full);
+              if (overlay.parentNode) document.body.removeChild(overlay);
+            },
+            width: "100%",
+            height: "100%",
+          }).embed(embedWrap, { q: searchKeyword, autoClose: false });
 
           locBtn.innerHTML = '✅ ' + searchKeyword;
           locBtn.style.background = "#e8f5e9";
