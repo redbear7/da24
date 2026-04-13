@@ -426,12 +426,88 @@ const LUGGAGE_APPLIANCE = [
   { key: "clothcare", label: "의류관리기", icon: "👔" },
 ];
 
+const LUGGAGE_SMALL_APPLIANCE = [
+  { key: "microwave", label: "전자레인지", icon: "📱" },
+  { key: "waterpurifier", label: "정수기", icon: "💧" },
+  { key: "gasstove", label: "가스레인지", icon: "🔥" },
+  { key: "bidet", label: "비데", icon: "🚽" },
+  { key: "airpurifier", label: "공기청정기", icon: "🌬️" },
+  { key: "cattower", label: "캣타워", icon: "🐱" },
+  { key: "exercise", label: "운동용품", icon: "💪" },
+];
+
+type OptionGroup = { key: string; label: string; options: string[] };
+
+const ITEM_OPTIONS: Record<string, OptionGroup[]> = {
+  bed: [
+    { key: "size", label: "크기", options: ["싱글", "슈퍼싱글", "더블", "퀸", "킹"] },
+    { key: "material", label: "재질", options: ["철제", "목제", "프레임없음"] },
+    { key: "assembly", label: "단단조립", options: ["필요", "불필요"] },
+  ],
+  wardrobe: [
+    { key: "width", label: "너비", options: ["100cm 미만", "100~150cm", "150~200cm", "200cm 초과"] },
+  ],
+  bookshelf: [
+    { key: "width", label: "너비", options: ["100cm 미만", "100~150cm", "150~200cm", "200cm 초과"] },
+    { key: "height", label: "높이", options: ["낮음(~120cm)", "보통(120~180cm)", "높음(180cm~)"] },
+  ],
+  desk: [
+    { key: "type", label: "종류", options: ["사각", "원형", "독서실"] },
+    { key: "size", label: "크기", options: ["1~2인", "3~4인"] },
+  ],
+  chair: [
+    { key: "type", label: "종류", options: ["등받이", "보조"] },
+  ],
+  table: [
+    { key: "type", label: "종류", options: ["사각", "원형", "독서실"] },
+    { key: "size", label: "크기", options: ["1~2인", "3~4인"] },
+  ],
+  sofa: [
+    { key: "size", label: "크기", options: ["1~2인", "3~4인"] },
+  ],
+  dresser: [
+    { key: "type", label: "종류", options: ["좌식", "일반"] },
+  ],
+  cabinet: [
+    { key: "type", label: "종류", options: ["신발장", "진열장", "TV장식장"] },
+  ],
+  drawer: [
+    { key: "size", label: "크기", options: ["3단 이하", "4단 이상"] },
+  ],
+  tv: [
+    { key: "type", label: "종류", options: ["일반TV", "벽걸이TV", "모니터"] },
+    { key: "detach", label: "탈부착", options: ["필요", "불필요"] },
+  ],
+  washer: [
+    { key: "type", label: "종류", options: ["통돌이", "드럼"] },
+    { key: "capacity", label: "용량", options: ["15kg 미만", "15kg 이상"] },
+  ],
+  dryer: [
+    { key: "capacity", label: "용량", options: ["15kg 미만", "15kg 이상"] },
+  ],
+  aircon: [
+    { key: "type", label: "종류", options: ["스탠드", "벽걸이"] },
+    { key: "detach", label: "분리작업", options: ["필요", "불필요"] },
+  ],
+  fridge: [
+    { key: "type", label: "종류", options: ["미니", "일반", "양문형"] },
+  ],
+};
+
+type ItemSelection = {
+  quantity: number;
+  options: Record<string, string>;
+  sameAsFirst: boolean;
+};
+
 type ModalStep = "intro" | "method" | "luggage" | "from" | "to" | "date" | "done";
 
 function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]; onClose: () => void }) {
   const [step, setStep] = useState<ModalStep>("intro");
   const [moveMethod, setMoveMethod] = useState<string | null>(null);
-  const [luggage, setLuggage] = useState<Record<string, number>>({});
+  const [luggageDetails, setLuggageDetails] = useState<Record<string, ItemSelection>>({});
+  const [boxes, setBoxes] = useState(0);
+  const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
   const [fromAddr, setFromAddr] = useState("");
   const [fromDetail, setFromDetail] = useState("");
   const [fromFloor, setFromFloor] = useState("");
@@ -445,6 +521,9 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
 
   const today = new Date().toISOString().split("T")[0];
   const needsMethod = move.type === "small";
+
+  const getSelection = (key: string): ItemSelection =>
+    luggageDetails[key] ?? { quantity: 0, options: {}, sameAsFirst: false };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -467,408 +546,595 @@ function MovingModal({ move, onClose }: { move: typeof MOVING_CATEGORIES[number]
     setStep("done");
   };
 
+  // 활성 아이템 정보 조회
+  const allLuggageItems = [...LUGGAGE_FURNITURE, ...LUGGAGE_APPLIANCE, ...LUGGAGE_SMALL_APPLIANCE];
+  const activeItem = activeItemKey ? allLuggageItems.find((i) => i.key === activeItemKey) : null;
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
+    <>
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
+          {/* 핸들바 */}
+          <div className="flex justify-center pt-3 sm:hidden"><div className="w-10 h-1 bg-border rounded-full" /></div>
+
+          {/* 헤더 */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3">
+            <h2 className="text-[18px] font-bold text-foreground">
+              {step === "intro" && move.title}
+              {step === "method" && "이사 방식 선택"}
+              {step === "luggage" && "짐량 선택"}
+              {step === "from" && "출발지를 검색해주세요"}
+              {step === "to" && "도착지를 검색해주세요"}
+              {step === "date" && "이사 날짜"}
+              {step === "done" && "신청 완료"}
+            </h2>
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted">
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
+
+          <div className="px-5 pb-6">
+
+            {/* Step 1: 안내 */}
+            {step === "intro" && (
+              <>
+                <h3 className="text-[18px] font-bold text-foreground leading-snug mt-2">
+                  <span className="text-primary">전문 포장이사 업체</span>를 통한{"\n"}
+                  쉽고 안전한 {move.title}!
+                </h3>
+                <div className="mt-5 bg-muted rounded-xl p-4">
+                  <p className="text-[14px] font-bold text-foreground mb-3">이런분들께 적합해요!</p>
+                  <ol className="space-y-2">
+                    {move.modalItems.map((item, i) => (
+                      <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex gap-1.5">
+                        <span className="text-primary font-bold shrink-0">{i + 1}.</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <button onClick={() => setStep(needsMethod ? "method" : "from")} className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all">
+                  다음
+                </button>
+              </>
+            )}
+
+            {/* Step 1.5: 이사 방식 선택 (소형이사만) */}
+            {step === "method" && (
+              <>
+                <div className="mt-2">
+                  <h3 className="text-[20px] font-bold text-foreground leading-snug">
+                    원하시는 이사 방식을<br />선택해 주세요
+                  </h3>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  {MOVE_METHODS.map((m) => (
+                    <button
+                      key={m.key}
+                      onClick={() => setMoveMethod(m.key)}
+                      className={`w-full text-left bg-card border-2 rounded-xl p-4 transition-all ${
+                        moveMethod === m.key ? "border-primary" : "border-border hover:border-primary/30"
+                      }`}
+                    >
+                      <p className="text-[16px] font-bold text-foreground">{m.title}</p>
+                      <p className="text-[13px] text-text-secondary mt-0.5">{m.desc}</p>
+                      {/* 단계 바 */}
+                      <div className="flex items-center mt-3 gap-0">
+                        {m.steps.map((s, i) => (
+                          <div key={i} className="flex-1 flex flex-col items-center">
+                            <div className="flex items-center w-full">
+                              <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${m.highlight.includes(i) ? "bg-primary" : "bg-border"}`} />
+                              {i < m.steps.length - 1 && (
+                                <div className={`flex-1 h-0.5 ${m.highlight.includes(i) && m.highlight.includes(i + 1) ? "bg-primary" : "bg-border"}`} />
+                              )}
+                            </div>
+                            <span className={`text-[11px] mt-1 ${m.highlight.includes(i) ? "text-foreground font-medium" : "text-text-muted"}`}>{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex gap-2 mt-5">
+                  <button
+                    onClick={() => setStep("intro")}
+                    className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    이전
+                  </button>
+                  <button
+                    onClick={() => setStep("luggage")}
+                    disabled={!moveMethod}
+                    className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                  >
+                    다음
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 2: 짐량 선택 (소형이사) */}
+            {step === "luggage" && (
+              <>
+                <div className="mt-2">
+                  <h3 className="text-[20px] font-bold text-primary leading-snug">
+                    내 짐량에 맞는 이사, 고민하지 마세요!
+                  </h3>
+                  <p className="text-[13px] text-text-secondary mt-2">
+                    선택하신 짐량이 원룸 규모면 소형이사, 그 이상은 가정이사로 자동 접수해드려요.
+                  </p>
+                  <p className="text-[12px] text-text-muted mt-1">
+                    *짐량 선택 시 버리고 갈 짐은 제외하고 입력해 주세요.
+                  </p>
+                </div>
+
+                {/* 가구 */}
+                <div className="mt-5">
+                  <h4 className="text-[16px] font-bold text-foreground mb-3">가구</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {LUGGAGE_FURNITURE.map((item) => {
+                      const sel = getSelection(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setActiveItemKey(item.key)}
+                          className={`border rounded-xl p-3 text-center transition-all relative ${
+                            sel.quantity > 0 ? "border-primary bg-secondary/50" : "border-border bg-card hover:border-primary/30"
+                          }`}
+                        >
+                          {sel.quantity > 0 && (
+                            <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full flex items-center justify-center z-10">
+                              {sel.quantity}
+                            </span>
+                          )}
+                          <span className="text-[24px]">{item.icon}</span>
+                          <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
+                          {sel.quantity > 0 && Object.keys(sel.options).length > 0 && (
+                            <p className="text-[11px] text-primary mt-0.5 truncate">
+                              {Object.values(sel.options)[0]}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 가전 */}
+                <div className="mt-5">
+                  <h4 className="text-[16px] font-bold text-foreground mb-3">가전</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {LUGGAGE_APPLIANCE.map((item) => {
+                      const sel = getSelection(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setActiveItemKey(item.key)}
+                          className={`border rounded-xl p-3 text-center transition-all relative ${
+                            sel.quantity > 0 ? "border-primary bg-secondary/50" : "border-border bg-card hover:border-primary/30"
+                          }`}
+                        >
+                          {sel.quantity > 0 && (
+                            <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full flex items-center justify-center z-10">
+                              {sel.quantity}
+                            </span>
+                          )}
+                          <span className="text-[24px]">{item.icon}</span>
+                          <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
+                          {sel.quantity > 0 && Object.keys(sel.options).length > 0 && (
+                            <p className="text-[11px] text-primary mt-0.5 truncate">
+                              {Object.values(sel.options)[0]}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 소형가전 */}
+                <div className="mt-5">
+                  <h4 className="text-[16px] font-bold text-foreground mb-3">소형가전</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {LUGGAGE_SMALL_APPLIANCE.map((item) => {
+                      const sel = getSelection(item.key);
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => setActiveItemKey(item.key)}
+                          className={`border rounded-xl p-3 text-center transition-all relative ${
+                            sel.quantity > 0 ? "border-primary bg-secondary/50" : "border-border bg-card hover:border-primary/30"
+                          }`}
+                        >
+                          {sel.quantity > 0 && (
+                            <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full flex items-center justify-center z-10">
+                              {sel.quantity}
+                            </span>
+                          )}
+                          <span className="text-[24px]">{item.icon}</span>
+                          <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 잔짐(박스) */}
+                <div className="mt-5">
+                  <h4 className="text-[16px] font-bold text-foreground mb-1">잔짐(박스)</h4>
+                  <p className="text-[12px] text-text-muted mb-3">우체국 5호 기준, 5박스 단위 증감</p>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setBoxes((b) => Math.max(0, b - 5))}
+                      className="w-10 h-10 rounded-full border border-border text-foreground text-[20px] flex items-center justify-center hover:bg-muted"
+                    >
+                      −
+                    </button>
+                    <span className="text-[20px] font-bold text-foreground min-w-[72px] text-center">
+                      {boxes}박스
+                    </span>
+                    <button
+                      onClick={() => setBoxes((b) => b + 5)}
+                      className="w-10 h-10 rounded-full border border-primary text-primary text-[20px] flex items-center justify-center hover:bg-secondary"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-5">
+                  <button
+                    onClick={() => setStep("method")}
+                    className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    이전
+                  </button>
+                  <button
+                    onClick={() => setStep("from")}
+                    className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
+                  >
+                    다음
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step 3: 출발지 */}
+            {step === "from" && (
+              <>
+                <div className="mt-2 space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={fromAddr}
+                      readOnly
+                      onClick={() => openPostcode(setFromAddr)}
+                      placeholder="도로명, 지번, 건물명 (2글자 이상)"
+                      className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
+                    />
+                    <button onClick={() => openPostcode(setFromAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
+                      🔍
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={fromDetail}
+                    onChange={(e) => setFromDetail(e.target.value)}
+                    placeholder="상세 주소 (동/호수)"
+                    className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
+                  />
+
+                  {/* 주소검색 Tip */}
+                  {!fromAddr && (
+                    <div className="mt-4">
+                      <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
+                      <ul className="space-y-2 text-[13px] text-text-secondary">
+                        <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
+                        <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
+                        <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 층수 선택 */}
+                  {fromAddr && (
+                    <div className="mt-3">
+                      <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {FLOOR_OPTS.map((f) => (
+                          <button key={f} onClick={() => setFromFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
+                            {f}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setFromNoElevator(!fromNoElevator)}
+                          className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
+                        >
+                          엘리베이터 없음
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setStep("to")}
+                  disabled={!fromAddr}
+                  className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                >
+                  다음
+                </button>
+              </>
+            )}
+
+            {/* Step 3: 도착지 */}
+            {step === "to" && (
+              <>
+                <div className="mt-2 space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={toAddr}
+                      readOnly
+                      onClick={() => openPostcode(setToAddr)}
+                      placeholder="도로명, 지번, 건물명 (2글자 이상)"
+                      className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
+                    />
+                    <button onClick={() => openPostcode(setToAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
+                      🔍
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={toDetail}
+                    onChange={(e) => setToDetail(e.target.value)}
+                    placeholder="상세 주소 (동/호수)"
+                    className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
+                  />
+
+                  {!toAddr && (
+                    <div className="mt-4">
+                      <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
+                      <ul className="space-y-2 text-[13px] text-text-secondary">
+                        <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
+                        <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
+                        <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {toAddr && (
+                    <div className="mt-3">
+                      <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {FLOOR_OPTS.map((f) => (
+                          <button key={f} onClick={() => setToFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
+                            {f}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setToNoElevator(!toNoElevator)}
+                          className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
+                        >
+                          엘리베이터 없음
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setStep("date")}
+                  disabled={!toAddr}
+                  className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                >
+                  다음
+                </button>
+              </>
+            )}
+
+            {/* Step 4: 이사 날짜 */}
+            {step === "date" && (
+              <>
+                <div className="mt-4 space-y-4">
+                  {/* 요약 */}
+                  <div className="bg-muted rounded-xl p-4 space-y-2 text-[13px]">
+                    <div className="flex gap-2">
+                      <span className="text-primary font-bold shrink-0">출발</span>
+                      <span className="text-foreground">{fromAddr} {fromDetail} {fromFloor && `(${fromFloor})`}{fromNoElevator && " · 엘리베이터 없음"}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-accent font-bold shrink-0">도착</span>
+                      <span className="text-foreground">{toAddr} {toDetail} {toFloor && `(${toFloor})`}{toNoElevator && " · 엘리베이터 없음"}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[14px] font-semibold text-foreground mb-2">이사 희망일을 선택해주세요</p>
+                    <input
+                      type="date"
+                      value={moveDate}
+                      min={today}
+                      onChange={(e) => setMoveDate(e.target.value)}
+                      className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4 accent-primary" />
+                    <span className="text-[13px] text-text-secondary">보관이사 필요</span>
+                    <span className="text-[11px] text-text-muted">ⓘ</span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={!moveDate || isSubmitting}
+                  className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
+                >
+                  {isSubmitting ? "신청 중..." : "추천업체 바로 신청하기"}
+                </button>
+              </>
+            )}
+
+            {/* Step 5: 완료 */}
+            {step === "done" && (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-[28px]">✅</span>
+                </div>
+                <h3 className="text-[20px] font-bold text-foreground">견적 요청 완료!</h3>
+                <p className="text-[14px] text-text-secondary mt-2 leading-relaxed">
+                  추천 업체에서 곧 연락드릴 예정입니다.<br />
+                  채팅내역에서 진행 상황을 확인하세요.
+                </p>
+                <button onClick={onClose} className="w-full mt-6 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all">
+                  확인
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 짐 세부옵션 바텀시트 ─── */}
+      {activeItem && (
+        <ItemDetailSheet
+          itemKey={activeItem.key}
+          label={activeItem.label}
+          icon={activeItem.icon}
+          selection={getSelection(activeItem.key)}
+          onSave={(sel) => {
+            setLuggageDetails((prev) => ({ ...prev, [activeItem.key]: sel }));
+            setActiveItemKey(null);
+          }}
+          onClose={() => setActiveItemKey(null)}
+        />
+      )}
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════ */
+/*  짐 세부옵션 바텀시트 모달                       */
+/* ═══════════════════════════════════════════ */
+
+function ItemDetailSheet({
+  itemKey,
+  label,
+  icon,
+  selection,
+  onSave,
+  onClose,
+}: {
+  itemKey: string;
+  label: string;
+  icon: string;
+  selection: ItemSelection;
+  onSave: (sel: ItemSelection) => void;
+  onClose: () => void;
+}) {
+  const [qty, setQty] = useState(selection.quantity > 0 ? selection.quantity : 1);
+  const [opts, setOpts] = useState<Record<string, string>>(selection.options || {});
+  const [sameAsFirst, setSameAsFirst] = useState(selection.sameAsFirst || false);
+
+  const groups = ITEM_OPTIONS[itemKey] || [];
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl max-h-[85vh] overflow-y-auto">
         {/* 핸들바 */}
-        <div className="flex justify-center pt-3 sm:hidden"><div className="w-10 h-1 bg-border rounded-full" /></div>
+        <div className="flex justify-center pt-3">
+          <div className="w-10 h-1 bg-border rounded-full" />
+        </div>
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3">
-          <h2 className="text-[18px] font-bold text-foreground">
-            {step === "intro" && move.title}
-            {step === "method" && "이사 방식 선택"}
-            {step === "luggage" && "짐량 선택"}
-            {step === "from" && "출발지를 검색해주세요"}
-            {step === "to" && "도착지를 검색해주세요"}
-            {step === "date" && "이사 날짜"}
-            {step === "done" && "신청 완료"}
-          </h2>
+        <div className="flex items-center justify-between px-5 pt-3 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[26px]">{icon}</span>
+            <h3 className="text-[18px] font-bold text-foreground">{label}</h3>
+          </div>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
-        <div className="px-5 pb-6">
-
-          {/* Step 1: 안내 */}
-          {step === "intro" && (
-            <>
-              <h3 className="text-[18px] font-bold text-foreground leading-snug mt-2">
-                <span className="text-primary">전문 포장이사 업체</span>를 통한{"\n"}
-                쉽고 안전한 {move.title}!
-              </h3>
-              <div className="mt-5 bg-muted rounded-xl p-4">
-                <p className="text-[14px] font-bold text-foreground mb-3">이런분들께 적합해요!</p>
-                <ol className="space-y-2">
-                  {move.modalItems.map((item, i) => (
-                    <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex gap-1.5">
-                      <span className="text-primary font-bold shrink-0">{i + 1}.</span>
-                      {item}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-              <button onClick={() => setStep(needsMethod ? "method" : "from")} className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all">
-                다음
+        <div className="px-5 pb-8 space-y-5">
+          {/* 수량 스테퍼 */}
+          <div>
+            <p className="text-[14px] font-semibold text-foreground mb-3">수량</p>
+            <div className="flex items-center gap-5">
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="w-11 h-11 rounded-full border border-border text-foreground text-[22px] flex items-center justify-center hover:bg-muted transition-colors"
+              >
+                −
               </button>
-            </>
-          )}
+              <span className="text-[22px] font-bold text-foreground w-8 text-center">{qty}</span>
+              <button
+                onClick={() => setQty((q) => Math.min(5, q + 1))}
+                className="w-11 h-11 rounded-full border border-primary text-primary text-[22px] flex items-center justify-center hover:bg-secondary transition-colors"
+              >
+                +
+              </button>
+            </div>
+          </div>
 
-          {/* Step 1.5: 이사 방식 선택 (소형이사만) */}
-          {step === "method" && (
-            <>
-              <div className="mt-2">
-                <h3 className="text-[20px] font-bold text-foreground leading-snug">
-                  원하시는 이사 방식을<br />선택해 주세요
-                </h3>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {MOVE_METHODS.map((m) => (
+          {/* 옵션 그룹 */}
+          {groups.map((group) => (
+            <div key={group.key}>
+              <p className="text-[14px] font-semibold text-foreground mb-2">{group.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {group.options.map((opt) => (
                   <button
-                    key={m.key}
-                    onClick={() => setMoveMethod(m.key)}
-                    className={`w-full text-left bg-card border-2 rounded-xl p-4 transition-all ${
-                      moveMethod === m.key ? "border-primary" : "border-border hover:border-primary/30"
+                    key={opt}
+                    onClick={() => setOpts((prev) => ({ ...prev, [group.key]: opt }))}
+                    className={`px-4 py-2 rounded-xl border text-[13px] font-medium transition-all ${
+                      opts[group.key] === opt
+                        ? "border-primary bg-secondary text-primary"
+                        : "border-border bg-card text-foreground hover:border-primary/30"
                     }`}
                   >
-                    <p className="text-[16px] font-bold text-foreground">{m.title}</p>
-                    <p className="text-[13px] text-text-secondary mt-0.5">{m.desc}</p>
-                    {/* 단계 바 */}
-                    <div className="flex items-center mt-3 gap-0">
-                      {m.steps.map((s, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center">
-                          <div className="flex items-center w-full">
-                            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${m.highlight.includes(i) ? "bg-primary" : "bg-border"}`} />
-                            {i < m.steps.length - 1 && (
-                              <div className={`flex-1 h-0.5 ${m.highlight.includes(i) && m.highlight.includes(i + 1) ? "bg-primary" : "bg-border"}`} />
-                            )}
-                          </div>
-                          <span className={`text-[11px] mt-1 ${m.highlight.includes(i) ? "text-foreground font-medium" : "text-text-muted"}`}>{s}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {opt}
                   </button>
                 ))}
               </div>
-
-              <div className="flex gap-2 mt-5">
-                <button
-                  onClick={() => setStep("intro")}
-                  className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
-                >
-                  이전
-                </button>
-                <button
-                  onClick={() => setStep("luggage")}
-                  disabled={!moveMethod}
-                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
-                >
-                  다음
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Step 2: 짐량 선택 (소형이사) */}
-          {step === "luggage" && (
-            <>
-              <div className="mt-2">
-                <h3 className="text-[20px] font-bold text-primary leading-snug">
-                  내 짐량에 맞는 이사, 고민하지 마세요!
-                </h3>
-                <p className="text-[13px] text-text-secondary mt-2">
-                  선택하신 짐량이 원룸 규모면 소형이사, 그 이상은 가정이사로 자동 접수해드려요.
-                </p>
-                <p className="text-[12px] text-text-muted mt-1">
-                  *짐량 선택 시 버리고 갈 짐은 제외하고 입력해 주세요.
-                </p>
-              </div>
-
-              {/* 가구 */}
-              <div className="mt-5">
-                <h4 className="text-[16px] font-bold text-foreground mb-3">가구</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {LUGGAGE_FURNITURE.map((item) => {
-                    const count = luggage[item.key] || 0;
-                    return (
-                      <div
-                        key={item.key}
-                        className={`border rounded-xl p-3 text-center transition-all ${
-                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
-                        }`}
-                      >
-                        <span className="text-[24px]">{item.icon}</span>
-                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
-                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
-                          >
-                            −
-                          </button>
-                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 가전 */}
-              <div className="mt-5">
-                <h4 className="text-[16px] font-bold text-foreground mb-3">가전</h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {LUGGAGE_APPLIANCE.map((item) => {
-                    const count = luggage[item.key] || 0;
-                    return (
-                      <div
-                        key={item.key}
-                        className={`border rounded-xl p-3 text-center transition-all ${
-                          count > 0 ? "border-primary bg-secondary/50" : "border-border bg-card"
-                        }`}
-                      >
-                        <span className="text-[24px]">{item.icon}</span>
-                        <p className="text-[13px] font-medium text-foreground mt-1">{item.label}</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: Math.max(0, (prev[item.key] || 0) - 1) }))}
-                            className="w-7 h-7 rounded-full border border-border text-foreground text-[16px] flex items-center justify-center hover:bg-muted"
-                          >
-                            −
-                          </button>
-                          <span className="text-[15px] font-bold text-foreground w-6 text-center">{count}</span>
-                          <button
-                            onClick={() => setLuggage((prev) => ({ ...prev, [item.key]: (prev[item.key] || 0) + 1 }))}
-                            className="w-7 h-7 rounded-full border border-primary text-primary text-[16px] flex items-center justify-center hover:bg-secondary"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex gap-2 mt-5">
-                <button
-                  onClick={() => setStep("method")}
-                  className="px-6 py-4 border border-border rounded-xl text-[16px] font-semibold text-foreground hover:bg-muted transition-colors"
-                >
-                  이전
-                </button>
-                <button
-                  onClick={() => setStep("from")}
-                  className="flex-1 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all"
-                >
-                  다음
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Step 3: 출발지 */}
-          {step === "from" && (
-            <>
-              <div className="mt-2 space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={fromAddr}
-                    readOnly
-                    onClick={() => openPostcode(setFromAddr)}
-                    placeholder="도로명, 지번, 건물명 (2글자 이상)"
-                    className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
-                  />
-                  <button onClick={() => openPostcode(setFromAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
-                    🔍
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={fromDetail}
-                  onChange={(e) => setFromDetail(e.target.value)}
-                  placeholder="상세 주소 (동/호수)"
-                  className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
-                />
-
-                {/* 주소검색 Tip */}
-                {!fromAddr && (
-                  <div className="mt-4">
-                    <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
-                    <ul className="space-y-2 text-[13px] text-text-secondary">
-                      <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
-                      <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
-                      <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
-                    </ul>
-                  </div>
-                )}
-
-                {/* 층수 선택 */}
-                {fromAddr && (
-                  <div className="mt-3">
-                    <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {FLOOR_OPTS.map((f) => (
-                        <button key={f} onClick={() => setFromFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
-                          {f}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setFromNoElevator(!fromNoElevator)}
-                        className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${fromNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
-                      >
-                        엘리베이터 없음
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => setStep("to")}
-                disabled={!fromAddr}
-                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
-              >
-                다음
-              </button>
-            </>
-          )}
-
-          {/* Step 3: 도착지 */}
-          {step === "to" && (
-            <>
-              <div className="mt-2 space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={toAddr}
-                    readOnly
-                    onClick={() => openPostcode(setToAddr)}
-                    placeholder="도로명, 지번, 건물명 (2글자 이상)"
-                    className="flex-1 px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted cursor-pointer"
-                  />
-                  <button onClick={() => openPostcode(setToAddr)} className="px-4 bg-muted border border-border rounded-xl hover:bg-border transition-colors">
-                    🔍
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={toDetail}
-                  onChange={(e) => setToDetail(e.target.value)}
-                  placeholder="상세 주소 (동/호수)"
-                  className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted"
-                />
-
-                {!toAddr && (
-                  <div className="mt-4">
-                    <p className="text-[14px] font-bold text-foreground mb-2">주소검색 Tip</p>
-                    <ul className="space-y-2 text-[13px] text-text-secondary">
-                      <li>• 도로명 + 건물번호<br /><span className="text-text-muted ml-3">(예 : 테헤란로7길 12)</span></li>
-                      <li>• 지번(동/읍.면/리) + 번지수<br /><span className="text-text-muted ml-3">(예 : 역삼동 648)</span></li>
-                      <li>• 건물명, 아파트명<br /><span className="text-text-muted ml-3">(예 : 동궁빌딩)</span></li>
-                    </ul>
-                  </div>
-                )}
-
-                {toAddr && (
-                  <div className="mt-3">
-                    <p className="text-[13px] font-semibold text-foreground mb-2">층수 선택</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {FLOOR_OPTS.map((f) => (
-                        <button key={f} onClick={() => setToFloor(f)} className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toFloor === f ? "border-primary bg-secondary text-primary" : "border-border bg-card text-foreground"}`}>
-                          {f}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setToNoElevator(!toNoElevator)}
-                        className={`py-2.5 rounded-xl border text-[13px] font-medium transition-all ${toNoElevator ? "border-accent bg-accent/10 text-accent" : "border-border bg-card text-foreground"}`}
-                      >
-                        엘리베이터 없음
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => setStep("date")}
-                disabled={!toAddr}
-                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
-              >
-                다음
-              </button>
-            </>
-          )}
-
-          {/* Step 4: 이사 날짜 */}
-          {step === "date" && (
-            <>
-              <div className="mt-4 space-y-4">
-                {/* 요약 */}
-                <div className="bg-muted rounded-xl p-4 space-y-2 text-[13px]">
-                  <div className="flex gap-2">
-                    <span className="text-primary font-bold shrink-0">출발</span>
-                    <span className="text-foreground">{fromAddr} {fromDetail} {fromFloor && `(${fromFloor})`}{fromNoElevator && " · 엘리베이터 없음"}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-accent font-bold shrink-0">도착</span>
-                    <span className="text-foreground">{toAddr} {toDetail} {toFloor && `(${toFloor})`}{toNoElevator && " · 엘리베이터 없음"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-[14px] font-semibold text-foreground mb-2">이사 희망일을 선택해주세요</p>
-                  <input
-                    type="date"
-                    value={moveDate}
-                    min={today}
-                    onChange={(e) => setMoveDate(e.target.value)}
-                    className="w-full px-4 py-3.5 bg-muted border border-border rounded-xl text-[15px] text-foreground"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 accent-primary" />
-                  <span className="text-[13px] text-text-secondary">보관이사 필요</span>
-                  <span className="text-[11px] text-text-muted">ⓘ</span>
-                </label>
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                disabled={!moveDate || isSubmitting}
-                className="w-full mt-5 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[18px] hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40"
-              >
-                {isSubmitting ? "신청 중..." : "추천업체 바로 신청하기"}
-              </button>
-            </>
-          )}
-
-          {/* Step 5: 완료 */}
-          {step === "done" && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[28px]">✅</span>
-              </div>
-              <h3 className="text-[20px] font-bold text-foreground">견적 요청 완료!</h3>
-              <p className="text-[14px] text-text-secondary mt-2 leading-relaxed">
-                추천 업체에서 곧 연락드릴 예정입니다.<br />
-                채팅내역에서 진행 상황을 확인하세요.
-              </p>
-              <button onClick={onClose} className="w-full mt-6 py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all">
-                확인
-              </button>
             </div>
+          ))}
+
+          {/* 복수 수량: 1번과 동일 체크박스 */}
+          {qty > 1 && groups.length > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sameAsFirst}
+                onChange={(e) => setSameAsFirst(e.target.checked)}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-[13px] text-text-secondary">2번째부터 1번과 동일</span>
+            </label>
+          )}
+
+          {/* 선택 완료 */}
+          <button
+            onClick={() => onSave({ quantity: qty, options: opts, sameAsFirst })}
+            className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl text-[16px] hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            선택 완료
+          </button>
+
+          {/* 선택 해제 */}
+          {selection.quantity > 0 && (
+            <button
+              onClick={() => onSave({ quantity: 0, options: {}, sameAsFirst: false })}
+              className="w-full py-2 text-[14px] text-text-muted hover:text-foreground transition-colors"
+            >
+              선택 해제
+            </button>
           )}
         </div>
       </div>
