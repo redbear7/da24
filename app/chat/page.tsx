@@ -67,6 +67,23 @@ export default function ChatPage() {
         localStorage.removeItem(LS_SAVE_PHONE);
       }
       setStep("code");
+
+      // WebOTP: SMS 수신 시 자동입력
+      if ("OTPCredential" in window) {
+        try {
+          const ac = new AbortController();
+          setTimeout(() => ac.abort(), 5 * 60 * 1000); // 5분 타임아웃
+          const otp = await (navigator.credentials as any).get({
+            otp: { transport: ["sms"] },
+            signal: ac.signal,
+          });
+          if (otp?.code) {
+            setCode(otp.code);
+          }
+        } catch {
+          // 사용자가 거부하거나 타임아웃 — 무시
+        }
+      }
     } catch {
       setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
