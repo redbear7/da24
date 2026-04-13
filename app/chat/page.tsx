@@ -240,6 +240,7 @@ export default function ChatPage() {
                 <input
                   type="text"
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   value={code}
                   onChange={(e) => { setCode(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
                   placeholder="인증번호 6자리"

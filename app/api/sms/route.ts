@@ -25,10 +25,14 @@ export async function POST(req: NextRequest) {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     saveCode(phoneClean, code);
 
+    // WebOTP 호환 포맷: 마지막 줄에 @domain #code
+    const origin = req.headers.get("origin") || "https://internet-nu.vercel.app";
+    const domain = new URL(origin).hostname;
+
     await messageService.sendOne({
       to: phoneClean,
       from: FROM_NUMBER,
-      text: `[다이사] 인증번호 [${code}]를 입력해주세요. (5분 이내)`,
+      text: `[다이사] 인증번호: ${code}\n\n@${domain} #${code}`,
     });
 
     return NextResponse.json({ success: true, message: "인증번호가 발송되었습니다." });
