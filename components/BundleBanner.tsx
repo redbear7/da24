@@ -73,20 +73,20 @@ export default function BundleBanner({ onSelect }: BundleBannerProps) {
         <h2 className="text-[16px] font-bold text-foreground">서비스 번들</h2>
         <span className="text-[12px] text-text-muted">묶어서 더 저렴하게</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="grid grid-cols-3 gap-2">
         {BUNDLES.map((bundle) => (
           <button
             key={bundle.type}
             onClick={() => onSelect(bundle)}
-            className={`shrink-0 w-[260px] bg-gradient-to-br ${bundle.bgFrom} ${bundle.bgTo} border border-border rounded-2xl p-4 text-left hover:border-primary/40 transition-all active:scale-[0.98] relative`}
+            className={`bg-gradient-to-br ${bundle.bgFrom} ${bundle.bgTo} border border-border rounded-2xl p-3 text-left hover:border-primary/40 transition-all active:scale-[0.98] relative`}
           >
             {bundle.badge && (
               <span className="absolute -top-2.5 left-4 text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-white">
                 {bundle.badge}
               </span>
             )}
-            <p className="text-[13px] font-semibold text-primary mb-1">{bundle.title}</p>
-            <p className="text-[15px] font-bold text-foreground leading-snug mb-2">{bundle.subtitle}</p>
+            <p className="text-[11px] font-semibold text-primary mb-0.5">{bundle.title}</p>
+            <p className="text-[13px] font-bold text-foreground leading-snug mb-2">{bundle.subtitle}</p>
 
             {/* 서비스 아이콘 */}
             <div className="flex items-center gap-1.5 mb-3">
