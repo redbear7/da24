@@ -18,6 +18,7 @@ import {
   Clock,
   Star,
 } from "lucide-react";
+import { UpsellBanner } from "@/components/UpsellModal";
 
 // ─────────────────────────────────────────────
 // Types & Constants
@@ -614,6 +615,7 @@ function CleanConsultationForm({
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showUpsell, setShowUpsell] = useState(false);
 
   const typeName = CLEAN_TYPES.find((t) => t.key === cleanType)?.label ?? "";
 
@@ -650,12 +652,16 @@ function CleanConsultationForm({
     setIsSubmitting(false);
     setIsSuccess(true);
     setTimeout(() => {
+      setShowUpsell(true);
+    }, 1500);
+    setTimeout(() => {
       setIsSuccess(false);
+      setShowUpsell(false);
       onClose();
       setName("");
       setPhone("");
       setMemo("");
-    }, 2000);
+    }, 8000);
   };
 
   if (!isOpen) return null;
@@ -664,6 +670,7 @@ function CleanConsultationForm({
     "w-full px-4 py-3.5 bg-card border-2 border-border rounded-xl text-[15px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary transition-all";
 
   return (
+    <>
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -771,6 +778,14 @@ function CleanConsultationForm({
         )}
       </div>
     </div>
+
+    {/* 청소 상담 완료 후 인터넷 업셀 배너 */}
+    <UpsellBanner
+      type="clean-to-internet"
+      isOpen={showUpsell}
+      onClose={() => setShowUpsell(false)}
+    />
+    </>
   );
 }
 

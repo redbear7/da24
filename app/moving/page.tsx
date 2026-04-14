@@ -24,6 +24,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { openPostcode } from "@/lib/daum-postcode";
+import UpsellModal, { UpsellBanner } from "@/components/UpsellModal";
 
 // ─────────────────────────────────────────────
 // Types & Constants
@@ -133,6 +134,8 @@ function HouseholdMoveModal({
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showUpsell, setShowUpsell] = useState(false);
+  const [showDateBanner, setShowDateBanner] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -145,6 +148,8 @@ function HouseholdMoveModal({
     setIsStorageMove(false);
     setName(""); setPhone(""); setMemo("");
     setIsSuccess(false);
+    setShowUpsell(false);
+    setShowDateBanner(false);
     onClose();
   };
 
@@ -163,8 +168,11 @@ function HouseholdMoveModal({
     setIsSubmitting(false);
     setIsSuccess(true);
     setTimeout(() => {
+      setShowUpsell(true);
+    }, 1500);
+    setTimeout(() => {
       handleClose();
-    }, 2500);
+    }, 8000);
   };
 
   if (!isOpen) return null;
@@ -276,6 +284,7 @@ function HouseholdMoveModal({
   }
 
   return (
+    <>
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
       <div className="relative bg-card w-full max-w-[480px] rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col animate-slide-up">
@@ -414,7 +423,7 @@ function HouseholdMoveModal({
                     type="date"
                     value={moveDate}
                     min={today}
-                    onChange={(e) => setMoveDate(e.target.value)}
+                    onChange={(e) => { setMoveDate(e.target.value); if (e.target.value) setShowDateBanner(true); }}
                     className="w-full pl-10 pr-4 py-3.5 bg-card border border-border rounded-xl text-[15px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
                   />
                 </div>
@@ -572,6 +581,21 @@ function HouseholdMoveModal({
         </div>
       </div>
     </div>
+
+    {/* 이사 날짜 선택 시 번들 배너 */}
+    <UpsellBanner
+      type="moving-date-bundle"
+      isOpen={showDateBanner && step === 3}
+      onClose={() => setShowDateBanner(false)}
+    />
+
+    {/* 견적 신청 완료 후 청소 업셀 모달 */}
+    <UpsellModal
+      type="moving-to-clean"
+      isOpen={showUpsell}
+      onClose={() => { setShowUpsell(false); handleClose(); }}
+    />
+    </>
   );
 }
 

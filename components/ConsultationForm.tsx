@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Phone, User, MapPin, MessageSquare, Loader2, CheckCircle } from "lucide-react";
 import { PlanType, ProviderKey, PLAN_TYPE_LABELS, PROVIDERS } from "@/lib/types";
+import { UpsellBanner } from "@/components/UpsellModal";
 
 interface Props {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function ConsultationForm({
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showUpsell, setShowUpsell] = useState(false);
 
   const providerInfo = PROVIDERS.find((p) => p.key === provider);
 
@@ -62,13 +64,17 @@ export default function ConsultationForm({
     setIsSubmitting(false);
     setIsSuccess(true);
     setTimeout(() => {
+      setShowUpsell(true);
+    }, 1500);
+    setTimeout(() => {
       setIsSuccess(false);
+      setShowUpsell(false);
       onClose();
       setName("");
       setPhone("");
       setAddress("");
       setMemo("");
-    }, 2000);
+    }, 8000);
   };
 
   if (!isOpen) return null;
@@ -77,6 +83,7 @@ export default function ConsultationForm({
     "w-full px-4 py-3 bg-card border border-border rounded-xl text-[16px] text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/10 transition-all";
 
   return (
+    <>
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
@@ -175,7 +182,14 @@ export default function ConsultationForm({
           </form>
         )}
       </div>
-
     </div>
+
+    {/* 인터넷 상담 완료 후 에어컨 업셀 배너 */}
+    <UpsellBanner
+      type="internet-to-aircon"
+      isOpen={showUpsell}
+      onClose={() => setShowUpsell(false)}
+    />
+    </>
   );
 }
