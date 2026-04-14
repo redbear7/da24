@@ -201,8 +201,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 서비스 번들 배너 ─── */}
-      <BundleBanner onSelect={(bundle) => setSelectedBundle(bundle)} />
+      {/* ─── 서비스 번들 배너 (추후 서비스 예정 — 숨김) ─── */}
+      {/* <BundleBanner onSelect={(bundle) => setSelectedBundle(bundle)} /> */}
 
       {/* ─── 대출 / 렌탈 ─── */}
       <section className="max-w-[640px] mx-auto px-5 pb-5">
