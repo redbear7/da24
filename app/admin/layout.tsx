@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MessageSquare, Building2, Star, Image, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Building2, Star, Image, Menu, X, LogOut, Package } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", icon: LayoutDashboard },
   { href: "/admin/consultations", label: "상담 관리", icon: MessageSquare },
+  { href: "/admin/bundles", label: "번들 상담", icon: Package },
   { href: "/admin/companies", label: "업체 관리", icon: Building2 },
   { href: "/admin/reviews", label: "리뷰 관리", icon: Star },
   { href: "/admin/banners", label: "배너 관리", icon: Image },

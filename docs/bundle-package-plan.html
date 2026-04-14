@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서비스 번들 패키지 운영안 — da24</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#1a1a2e;background:#f0f2f5;line-height:1.7}
+  .r{max-width:860px;margin:20px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.1);overflow:hidden}
+  @media print{body{background:#fff}.r{box-shadow:none;margin:0}.no-print{display:none}.page-break{page-break-before:always}}
+  :root{--b:#2640E6;--n:#1B2A4A;--r:#EA2804;--g:#5A6278;--l:#F4F6F9;--bd:#E5E7EB;--gn:#2E7D32;--gl:#D4A853}
+  .cover{background:linear-gradient(135deg,var(--n),var(--b));padding:50px;color:#fff}
+  .cover h1{font-size:30px;font-weight:900}
+  .cover .sub{font-size:15px;color:rgba(255,255,255,.7);margin-top:6px}
+  .cover .meta{font-size:11px;color:rgba(255,255,255,.5);margin-top:18px}
+  .c{padding:35px 40px}
+  h2{font-size:20px;font-weight:800;color:var(--n);margin:30px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--b)}
+  h3{font-size:16px;font-weight:700;color:var(--b);margin:20px 0 8px}
+  p{font-size:13px;color:var(--g);margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+  th{background:var(--n);color:#fff;padding:9px 12px;text-align:center;font-weight:600}
+  td{padding:8px 12px;border-bottom:1px solid var(--bd)}
+  tr:nth-child(even) td{background:var(--l)}
+  .pkg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
+  .pkg-card{border:2px solid var(--bd);border-radius:14px;padding:20px;position:relative;transition:border-color .2s}
+  .pkg-card:hover{border-color:var(--b)}
+  .pkg-card.pop{border-color:var(--b);background:#f8faff}
+  .pkg-card .tag{position:absolute;top:-10px;left:16px;background:var(--r);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px}
+  .pkg-card h4{font-size:15px;font-weight:800;color:var(--n);margin-bottom:6px}
+  .pkg-card .items{font-size:12px;color:var(--g);line-height:1.8}
+  .pkg-card .price{margin-top:12px;font-size:18px;font-weight:900;color:var(--b)}
+  .pkg-card .discount{font-size:11px;color:var(--r);font-weight:600}
+  .flow-box{background:var(--l);border-radius:12px;padding:20px;margin:15px 0}
+  .flow-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+  .flow-step:last-child{margin-bottom:0}
+  .flow-num{width:28px;height:28px;background:var(--b);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .flow-text{font-size:13px;color:var(--n)}
+  .flow-text .sub{font-size:11px;color:var(--g);margin-top:2px}
+  .calc{background:var(--n);color:#e8ebf0;border-radius:10px;padding:18px;margin:12px 0;font-family:monospace;font-size:12px;line-height:2}
+  .calc .v{color:#5b7cf7}.calc .o{color:#d4a853}.calc .n{color:#4caf50}
+  .card{background:var(--l);border-radius:10px;padding:16px;margin:12px 0;border-left:4px solid var(--b)}
+  .kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:15px 0}
+  .kpi-item{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px;text-align:center}
+  .kpi-item .val{font-size:22px;font-weight:900;color:var(--b)}
+  .kpi-item .lbl{font-size:11px;color:var(--g);margin-top:4px}
+  .upsell{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:15px 0}
+  .upsell-card{border:1px solid var(--bd);border-radius:12px;padding:16px;background:#fff}
+  .upsell-card h4{font-size:13px;font-weight:700;color:var(--n);margin-bottom:4px}
+  .upsell-card p{font-size:11px;margin:0}
+  .upsell-card .rate{font-size:16px;font-weight:900;color:var(--gn);margin-top:6px}
+  .ft{background:var(--n);padding:18px 40px;text-align:center}
+  .ft p{color:rgba(255,255,255,.5);font-size:11px;margin:0}
+  .pb{position:fixed;bottom:30px;right:30px;background:var(--n);color:#fff;border:none;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:100}
+  .pb:hover{background:var(--b)}
+</style>
+</head>
+<body>
+<button class="pb no-print" onclick="window.print()">프린트</button>
+<div class="r">
+
+<div class="cover">
+  <h1>서비스 번들 패키지 운영안</h1>
+  <div class="sub">이사+청소+인터넷+에어컨 올인원 — 수익 극대화 전략</div>
+  <div class="meta">2026.04.14 | da24 사업기획팀</div>
+</div>
+
+<div class="c">
+
+<h2>1. 패키지 구성 (3종)</h2>
+
+<div class="pkg">
+  <div class="pkg-card">
+    <h4>📦 기본 패키지</h4>
+    <div class="items">
+      ✅ 이사<br>
+      ✅ 입주청소<br>
+      ⬜ 인터넷<br>
+      ⬜ 에어컨
+    </div>
+    <div class="discount">청소비 10% 할인</div>
+    <div class="price">~1.5만원 절약</div>
+  </div>
+  <div class="pkg-card pop">
+    <div class="tag">가장 인기</div>
+    <h4>🏠 올인원 패키지</h4>
+    <div class="items">
+      ✅ 이사<br>
+      ✅ 입주청소<br>
+      ✅ 인터넷<br>
+      ⬜ 에어컨
+    </div>
+    <div class="discount">청소 10% + 인터넷 지원금 +5만</div>
+    <div class="price">~6.5만원 절약</div>
+  </div>
+  <div class="pkg-card">
+    <h4>👑 프리미엄 패키지</h4>
+    <div class="items">
+      ✅ 이사<br>
+      ✅ 입주청소<br>
+      ✅ 인터넷<br>
+      ✅ 에어컨
+    </div>
+    <div class="discount">청소 15% + 인터넷 +5만 + 에어컨 10%</div>
+    <div class="price">~9만원 절약</div>
+  </div>
+</div>
+
+<h2>2. 수익 구조</h2>
+
+<div class="calc">
+  <strong>단독 신청</strong>: 이사만 → 수수료 <span class="n">5만원</span><br>
+  <strong>기본 패키지</strong>: 이사+청소 → <span class="n">5만</span> + <span class="n">3만</span> + 보너스 <span class="v">2만</span> = <span class="o">10만원</span><br>
+  <strong>올인원</strong>: 이사+청소+인터넷 → <span class="n">5만</span> + <span class="n">3만</span> + <span class="n">12만</span> + <span class="v">2만</span> = <span class="o">22만원</span><br>
+  <strong>프리미엄</strong>: 전체 → <span class="n">5만</span> + <span class="n">3만</span> + <span class="n">12만</span> + <span class="n">5만</span> + <span class="v">2만</span> = <span class="o">27만원</span><br><br>
+  핵심: 이사 1건에서 최대 <span class="o" style="font-size:16px">5.4배</span> 수수료 확보 (5만 → 27만)
+</div>
+
+<table>
+  <tr><th>서비스</th><th>단독 수수료</th><th>번들 수수료</th><th>번들 보너스</th></tr>
+  <tr><td>이사 매칭</td><td style="text-align:center">3~8만</td><td style="text-align:center">동일</td><td style="text-align:center">—</td></tr>
+  <tr><td>입주청소</td><td style="text-align:center">2~5만</td><td style="text-align:center">동일</td><td style="text-align:center">—</td></tr>
+  <tr><td>인터넷 CPA</td><td style="text-align:center">8~15만</td><td style="text-align:center">동일</td><td style="text-align:center">—</td></tr>
+  <tr><td>에어컨</td><td style="text-align:center">3~8만</td><td style="text-align:center">동일</td><td style="text-align:center">—</td></tr>
+  <tr><td style="font-weight:700;color:var(--b)">번들 보너스</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="text-align:center;font-weight:700;color:var(--b)">+2만원/패키지</td></tr>
+</table>
+
+<h2>3. 고객 플로우</h2>
+
+<div class="flow-box">
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">메인홈 번들 배너 클릭<div class="sub">"이사+청소+인터넷 올인원 패키지"</div></div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">패키지 선택<div class="sub">기본 / 올인원(인기) / 프리미엄</div></div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">기본 정보 입력<div class="sub">이름, 연락처, 출발지/도착지, 이사날짜, 평수</div></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">패키지 상담 신청 완료<div class="sub">SMS: "○○님의 [올인원 패키지] 상담이 접수되었습니다"</div></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">서비스별 분리 배정<div class="sub">이사→업체 SMS / 청소→업체 SMS / 인터넷→상담사 / 에어컨→업체 SMS</div></div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text">완료 후 리뷰 요청<div class="sub">자동 SMS 발송 → 리뷰 작성 → 평점 반영</div></div></div>
+</div>
+
+<h2>4. 업셀/크로스셀 전략</h2>
+
+<div class="upsell">
+  <div class="upsell-card">
+    <h4>이사 → 청소 (업셀)</h4>
+    <p>"입주청소도 함께 신청하시겠어요?"</p>
+    <p>이사 견적 완료 후 모달</p>
+    <div class="rate">예상 전환율 30~40%</div>
+  </div>
+  <div class="upsell-card">
+    <h4>청소 → 인터넷 (크로스셀)</h4>
+    <p>"인터넷 가입하면 지원금 48만원!"</p>
+    <p>청소 상담 완료 후 배너</p>
+    <div class="rate">예상 전환율 20~25%</div>
+  </div>
+  <div class="upsell-card">
+    <h4>인터넷 → 에어컨 (크로스셀)</h4>
+    <p>"에어컨 설치도 필요하시면?"</p>
+    <p>인터넷 상담 완료 후</p>
+    <div class="rate">예상 전환율 10~15%</div>
+  </div>
+  <div class="upsell-card">
+    <h4>이사 날짜 선택 시</h4>
+    <p>"이사일에 맞춰 청소+인터넷 한번에!"</p>
+    <p>이사 모달 날짜 단계 배너</p>
+    <div class="rate">예상 전환율 25~35%</div>
+  </div>
+</div>
+
+<h2>5. 마케팅 배너 문구 (A/B 테스트)</h2>
+
+<table>
+  <tr><th>버전</th><th>문구</th><th>타겟</th></tr>
+  <tr><td style="text-align:center;font-weight:700">A</td><td>"이사할 때 청소까지 한번에! 최대 10% 할인"</td><td>가격 민감형</td></tr>
+  <tr><td style="text-align:center;font-weight:700">B</td><td>"이사+청소+인터넷 올인원! 번거로움 제로"</td><td>편의 중시형</td></tr>
+  <tr><td style="text-align:center;font-weight:700">C</td><td>"780만 고객이 선택한 패키지 상담"</td><td>신뢰 중시형</td></tr>
+  <tr><td style="text-align:center;font-weight:700">D</td><td>"신축 입주? 이사+청소+인터넷+에어컨 한번에"</td><td>신축 입주자</td></tr>
+</table>
+
+<h2>6. KPI 목표</h2>
+
+<div class="kpi">
+  <div class="kpi-item"><div class="val">20%</div><div class="lbl">번들 신청률<br>(이사 대비)</div></div>
+  <div class="kpi-item"><div class="val">30%</div><div class="lbl">업셀 전환율<br>(이사→청소)</div></div>
+  <div class="kpi-item"><div class="val">25%</div><div class="lbl">크로스셀<br>(이사→인터넷)</div></div>
+  <div class="kpi-item"><div class="val">15만+</div><div class="lbl">패키지당<br>평균 수수료</div></div>
+  <div class="kpi-item"><div class="val">9.0</div><div class="lbl">고객 만족도<br>(/10점)</div></div>
+</div>
+
+<h2>7. 구현 일정</h2>
+
+<table>
+  <tr><th>주차</th><th>작업</th><th>담당</th></tr>
+  <tr><td style="text-align:center;font-weight:700">W1</td><td>번들 배너 UI + 패키지 선택 모달</td><td>프론트엔드</td></tr>
+  <tr><td style="text-align:center;font-weight:700">W1</td><td>bundle_consultations DB + API</td><td>백엔드</td></tr>
+  <tr><td style="text-align:center;font-weight:700">W2</td><td>업셀/크로스셀 모달 (이사→청소→인터넷)</td><td>프론트엔드</td></tr>
+  <tr><td style="text-align:center;font-weight:700">W2</td><td>번들 SMS 알림 (솔라피)</td><td>백엔드</td></tr>
+  <tr><td style="text-align:center;font-weight:700">W3</td><td>어드민 번들 관리 페이지</td><td>대시보드</td></tr>
+  <tr><td style="text-align:center;font-weight:700">W3</td><td>A/B 테스트 배너 문구</td><td>디자인</td></tr>
+</table>
+
+<div class="card" style="margin-top:25px;border-left-color:var(--gl);">
+  <p style="font-size:14px;font-weight:700;color:var(--n);">핵심 요약</p>
+  <p>이사 1건 수수료 5만원 → 번들 최대 <strong style="color:var(--b)">27만원 (5.4배)</strong></p>
+  <p>고객은 최대 <strong style="color:var(--r)">9만원 절약</strong>, 플랫폼은 수수료 극대화</p>
+  <p>업셀 타이밍: 이사 완료 직후 → 청소/인터넷 제안 (<strong style="color:var(--gn)">전환율 30%+</strong>)</p>
+</div>
+
+</div>
+
+<div class="ft">
+  <p>da24 홈서비스 플랫폼 | 서비스 번들 패키지 운영안 | 2026.04.14</p>
+</div>
+
+</div>
+</body>
+</html>

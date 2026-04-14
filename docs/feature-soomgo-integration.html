@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숨고 스타일 기능 적용 기획서 — da24</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; color: #1a1a2e; background: #f0f2f5; line-height: 1.7; }
+  .report { max-width: 860px; margin: 0 auto; background: #fff; }
+  @media screen { .report { margin: 20px auto; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; } }
+  @media print { body { background: #fff; } .report { box-shadow: none; } .no-print { display: none; } }
+
+  :root { --navy: #1B2A4A; --blue: #2640E6; --red: #EA2804; --gold: #D4A853; --gray: #5A6278; --light: #F4F6F9; --border: #E5E7EB; }
+
+  .cover { background: linear-gradient(135deg, var(--navy) 0%, #2640E6 100%); padding: 50px; color: #fff; }
+  .cover h1 { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+  .cover .sub { font-size: 16px; color: rgba(255,255,255,0.7); }
+  .cover .meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 20px; }
+
+  .content { padding: 40px; }
+  h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin: 35px 0 15px; padding-bottom: 8px; border-bottom: 2px solid var(--blue); }
+  h3 { font-size: 17px; font-weight: 700; color: var(--blue); margin: 25px 0 10px; }
+  p { font-size: 14px; color: var(--gray); margin-bottom: 10px; }
+  strong { color: var(--navy); }
+
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
+  th { background: var(--navy); color: #fff; padding: 10px 14px; text-align: center; font-weight: 600; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: var(--light); }
+
+  .card { background: var(--light); border-radius: 12px; padding: 20px; margin: 15px 0; border-left: 4px solid var(--blue); }
+  .card h4 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .card p { font-size: 13px; margin-bottom: 5px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 4px; }
+  .badge-blue { background: #E8EDFF; color: var(--blue); }
+  .badge-red { background: #FFEDED; color: var(--red); }
+  .badge-gold { background: #FFF8E8; color: #B8860B; }
+  .badge-green { background: #E8FFE8; color: #2E7D32; }
+
+  .priority-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 20px 0; }
+  .priority-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .priority-card.p1 { border-color: var(--blue); }
+  .priority-card .num { font-size: 28px; font-weight: 900; color: var(--blue); }
+  .priority-card .title { font-size: 12px; font-weight: 700; color: var(--navy); margin-top: 6px; }
+  .priority-card .diff { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+  .mockup { background: #fff; border: 2px solid var(--border); border-radius: 16px; padding: 20px; margin: 15px 0; font-family: monospace; font-size: 13px; line-height: 1.8; color: var(--navy); }
+
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
+  .flow-step { background: var(--blue); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+  .flow-arrow { color: var(--gray); font-size: 16px; }
+
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+  .agent-card { background: var(--light); border-radius: 10px; padding: 14px; text-align: center; }
+  .agent-card .name { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .agent-card .role { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+  .formula { background: #1a1a2e; color: #e8ebf0; border-radius: 10px; padding: 20px; margin: 15px 0; font-family: monospace; font-size: 13px; line-height: 2; }
+  .formula .var { color: #5b7cf7; }
+  .formula .op { color: #d4a853; }
+  .formula .val { color: #4caf50; }
+
+  .footer { background: var(--navy); padding: 20px 40px; text-align: center; }
+  .footer p { color: rgba(255,255,255,0.5); font-size: 11px; margin: 0; }
+
+  .print-btn { position: fixed; bottom: 30px; right: 30px; background: var(--navy); color: #fff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
+  .print-btn:hover { background: var(--blue); }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">🖨️ 프린트</button>
+
+<div class="report">
+
+  <!-- 표지 -->
+  <div class="cover">
+    <h1>숨고 스타일 기능 적용 기획서</h1>
+    <div class="sub">da24 홈서비스 플랫폼 — soomgo.com 벤치마킹</div>
+    <div class="meta">2026.04.14 | 사업기획팀 | 참고: soomgo.com 이사/청소 카테고리</div>
+  </div>
+
+  <div class="content">
+
+    <!-- 요약 -->
+    <h2>적용 기능 요약</h2>
+    <div class="priority-grid">
+      <div class="priority-card p1">
+        <div class="num">1</div>
+        <div class="title">업체 프로필 카드</div>
+        <div class="diff">난이도: 중</div>
+      </div>
+      <div class="priority-card p1">
+        <div class="num">2</div>
+        <div class="title">오늘의 추천 업체</div>
+        <div class="diff">난이도: 중</div>
+      </div>
+      <div class="priority-card">
+        <div class="num">3</div>
+        <div class="title">AI 견적 요청</div>
+        <div class="diff">난이도: 높음</div>
+      </div>
+      <div class="priority-card">
+        <div class="num">4</div>
+        <div class="title">서비스 검색</div>
+        <div class="diff">난이도: 낮음</div>
+      </div>
+      <div class="priority-card">
+        <div class="num">5</div>
+        <div class="title">번들 배너</div>
+        <div class="diff">난이도: 낮음</div>
+      </div>
+    </div>
+
+    <!-- 기능 1 -->
+    <h2>1. AI 견적 요청 (자동 견적 추정)</h2>
+    <p><span class="badge badge-blue">숨고 참고</span> "AI 견적 요청" 버튼 → 짐량/주소 기반 자동 견적</p>
+
+    <table>
+      <tr><th>항목</th><th>구현 내용</th></tr>
+      <tr><td><strong>위치</strong></td><td>메인홈 상단 + 이사 모달 내</td></tr>
+      <tr><td><strong>동작</strong></td><td>출발지/도착지 + 평수 + 짐량 입력 → 예상 견적 금액 자동 산출</td></tr>
+      <tr><td><strong>로직</strong></td><td>평수별 기본 가격 + 거리 가중치 + 짐량 가중치</td></tr>
+      <tr><td><strong>UI</strong></td><td>"예상 견적: 약 85만원 ~ 120만원" 범위 표시</td></tr>
+      <tr><td><strong>파일</strong></td><td><code>lib/estimate-calculator.ts</code>, <code>components/EstimateBanner.tsx</code></td></tr>
+    </table>
+
+    <h3>예상 가격 로직</h3>
+    <div class="formula">
+      <span class="var">기본가</span> <span class="op">=</span> 평수별 기준가 (<span class="val">10평 40만</span>, <span class="val">20평 70만</span>, <span class="val">30평 100만</span>, <span class="val">40평+ 130만</span>)<br>
+      <span class="var">거리</span> <span class="op">=</span> 시내 <span class="val">0%</span>, 시외 <span class="val">+10%</span>, 장거리 <span class="val">+20%</span><br>
+      <span class="var">짐량</span> <span class="op">=</span> 기본 <span class="val">0%</span>, 많음 <span class="val">+15%</span>, 매우많음 <span class="val">+30%</span><br>
+      <span class="var">예상가</span> <span class="op">=</span> <span class="var">기본가</span> <span class="op">×</span> (1 + <span class="var">거리</span> + <span class="var">짐량</span>) <span class="op">±</span> <span class="val">15%</span>
+    </div>
+
+    <!-- 기능 2 -->
+    <h2>2. 업체 프로필 카드</h2>
+    <p><span class="badge badge-blue">숨고 참고</span> 별점 5.0 + 리뷰수(68) + 경력 4년 + 포트폴리오</p>
+
+    <table>
+      <tr><th>항목</th><th>구현 내용</th></tr>
+      <tr><td><strong>위치</strong></td><td>/moving 업체 리스트, 메인홈 추천 업체</td></tr>
+      <tr><td><strong>카드 구성</strong></td><td>업체명 + ★ 평점(리뷰수) + 경력 + 전문 분야 태그 + 한줄 소개</td></tr>
+      <tr><td><strong>DB</strong></td><td>moving_companies에 career_years, portfolio_url 컬럼 추가</td></tr>
+      <tr><td><strong>뱃지</strong></td><td>premium/vip 업체에 "추천" 뱃지</td></tr>
+    </table>
+
+    <h3>카드 UI 목업</h3>
+    <div class="mockup">
+      <div style="border:2px solid #e5e7eb;border-radius:16px;padding:20px;max-width:320px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div>
+            <span style="background:#E8EDFF;color:#2640E6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;">추천</span>
+            <div style="font-size:17px;font-weight:800;margin-top:6px;">🏠 창원 해피무브</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:14px;">
+          <span style="color:#2640E6;">★ 4.9</span> <span style="color:#8D95A7;">(412)</span> · 경력 8년
+        </div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span style="background:#f4f6f9;padding:3px 10px;border-radius:6px;font-size:12px;">가정이사</span>
+          <span style="background:#f4f6f9;padding:3px 10px;border-radius:6px;font-size:12px;">포장이사</span>
+          <span style="background:#f4f6f9;padding:3px 10px;border-radius:6px;font-size:12px;">에어컨</span>
+        </div>
+        <div style="margin-top:8px;font-size:13px;color:#5A6278;">"이사+에어컨 원스톱 서비스"</div>
+        <button style="margin-top:12px;width:100%;padding:12px;background:#2640E6;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">견적 요청하기</button>
+      </div>
+    </div>
+
+    <!-- 기능 3 -->
+    <h2>3. "오늘의 추천 업체" 섹션</h2>
+    <p><span class="badge badge-gold">수익 모델</span> premium/vip 업체 상위 노출 + 광고 태그</p>
+
+    <table>
+      <tr><th>항목</th><th>구현 내용</th></tr>
+      <tr><td><strong>위치</strong></td><td>메인홈 고객 평가 아래</td></tr>
+      <tr><td><strong>구조</strong></td><td>카테고리 탭 (이사/청소/인터넷/에어컨) + 업체 카드 가로 스크롤</td></tr>
+      <tr><td><strong>정렬</strong></td><td>tier(vip→premium→basic) + 평점 순</td></tr>
+      <tr><td><strong>광고</strong></td><td>premium/vip 업체에 "광고" 태그 표시</td></tr>
+    </table>
+
+    <div class="card">
+      <h4>업체 등급 체계</h4>
+      <p><span class="badge badge-red">VIP</span> 최상위 노출 + 뱃지 + 차량 랩핑 지원</p>
+      <p><span class="badge badge-blue">Premium</span> 상위 노출 + 추천 뱃지</p>
+      <p><span class="badge badge-green">Basic</span> 일반 노출</p>
+    </div>
+
+    <!-- 기능 4 -->
+    <h2>4. 서비스 검색 + 지역 자동 감지</h2>
+    <p><span class="badge badge-blue">숨고 참고</span> "창원시 의창구 ∨ 에서 어떤 서비스가 필요하세요?"</p>
+
+    <div class="flow">
+      <div class="flow-step">📍 GPS 위치 감지</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">"창원시 의창구" 표시</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">서비스 검색 입력</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">해당 페이지 이동</div>
+    </div>
+
+    <table>
+      <tr><th>검색 키워드</th><th>이동 경로</th></tr>
+      <tr><td>"이사", "포장이사"</td><td>/moving</td></tr>
+      <tr><td>"청소", "입주청소"</td><td>/clean</td></tr>
+      <tr><td>"인터넷", "통신"</td><td>/internet</td></tr>
+      <tr><td>"에어컨", "설치"</td><td>/aircon</td></tr>
+      <tr><td>"대출"</td><td>/loan</td></tr>
+    </table>
+
+    <!-- 기능 5 -->
+    <h2>5. 서비스 번들 배너</h2>
+    <p><span class="badge badge-green">매출 증대</span> 이사+청소+인터넷 올인원 패키지</p>
+
+    <div class="card" style="border-left-color: var(--gold);">
+      <h4>🎁 이사 올인원 패키지</h4>
+      <p>이사 + 입주청소 + 인터넷 + 에어컨</p>
+      <p><strong>한번에 신청하고 최대 30% 절약!</strong></p>
+      <p style="margin-top:8px;"><span class="badge badge-red">패키지 상담 신청하기 →</span></p>
+    </div>
+
+    <!-- 구현 우선순위 -->
+    <h2>구현 우선순위</h2>
+    <table>
+      <tr><th>순위</th><th>기능</th><th>난이도</th><th>효과</th><th>상태</th></tr>
+      <tr><td style="text-align:center;font-weight:800;color:var(--blue);">1</td><td>업체 프로필 카드</td><td style="text-align:center;">중</td><td style="text-align:center;">높음</td><td style="text-align:center;">대기</td></tr>
+      <tr><td style="text-align:center;font-weight:800;color:var(--blue);">2</td><td>오늘의 추천 업체</td><td style="text-align:center;">중</td><td style="text-align:center;">높음</td><td style="text-align:center;">대기</td></tr>
+      <tr><td style="text-align:center;font-weight:800;">3</td><td>AI 견적 요청</td><td style="text-align:center;">높음</td><td style="text-align:center;">매우 높음</td><td style="text-align:center;">대기</td></tr>
+      <tr><td style="text-align:center;">4</td><td>서비스 검색 + 지역 감지</td><td style="text-align:center;">낮음</td><td style="text-align:center;">중간</td><td style="text-align:center;">대기</td></tr>
+      <tr><td style="text-align:center;">5</td><td>서비스 번들 배너</td><td style="text-align:center;">낮음</td><td style="text-align:center;">중간</td><td style="text-align:center;">대기</td></tr>
+    </table>
+
+    <!-- 에이전트 분배 -->
+    <h2>에이전트 분배</h2>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="name">da24 프론트엔드</div>
+        <div class="role">CompanyCard<br>RecommendedCompanies<br>ServiceSearch</div>
+      </div>
+      <div class="agent-card">
+        <div class="name">da24 백엔드</div>
+        <div class="role">AI 견적 로직<br>DB 스키마 확장<br>(career_years, tier)</div>
+      </div>
+      <div class="agent-card">
+        <div class="name">da24 디자인</div>
+        <div class="role">번들 배너<br>카드 디자인 QA</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 푸터 -->
+  <div class="footer">
+    <p>da24 홈서비스 플랫폼 | 숨고 스타일 기능 적용 기획서 | 2026.04.14</p>
+  </div>
+
+</div>
+
+</body>
+</html>
