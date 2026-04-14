@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BundleBanner from "@/components/BundleBanner";
+import BundleModal from "@/components/BundleModal";
 import { supabase } from "@/lib/supabase";
 import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
+import type { BundleInfo } from "@/components/BundleBanner";
 
 /* ─── 이사 카테고리 ─── */
 const MOVING_CATEGORIES = [
@@ -83,6 +86,7 @@ export default function HomePage() {
   const [selectedMove, setSelectedMove] = useState<typeof MOVING_CATEGORIES[number] | null>(null);
   const [banners, setBanners] = useState(DEFAULT_BANNERS);
   const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [selectedBundle, setSelectedBundle] = useState<BundleInfo | null>(null);
 
   // Supabase에서 배너 + 리뷰 가져오기
   useEffect(() => {
@@ -197,6 +201,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── 서비스 번들 배너 ─── */}
+      <BundleBanner onSelect={(bundle) => setSelectedBundle(bundle)} />
+
       {/* ─── 대출 / 렌탈 ─── */}
       <section className="max-w-[640px] mx-auto px-5 pb-5">
         <div className="grid grid-cols-2 border border-border rounded-xl overflow-hidden">
@@ -294,6 +301,14 @@ export default function HomePage() {
 
       {/* ─── 이사 멀티스텝 모달 ─── */}
       {selectedMove && <MovingModal move={selectedMove} onClose={() => setSelectedMove(null)} />}
+
+      {/* ─── 번들 패키지 모달 ─── */}
+      {selectedBundle && (
+        <BundleModal
+          initialBundle={selectedBundle}
+          onClose={() => setSelectedBundle(null)}
+        />
+      )}
     </div>
   );
 }
