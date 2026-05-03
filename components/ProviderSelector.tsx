@@ -45,10 +45,10 @@ const LOGO_CONFIG: Record<ProviderKey, {
 
 export default function ProviderSelector({ selected, onChange }: Props) {
   return (
-    <section className="max-w-[640px] mx-auto px-5 pb-6">
-      <h2 className="text-[18px] font-bold text-foreground mb-4">통신사 선택</h2>
+    <section className="apple-container pb-6">
+      <h2 className="mb-4 text-[24px] font-semibold tracking-tight text-foreground">통신사 선택</h2>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {PROVIDERS.map((provider) => {
           const isActive = selected === provider.key;
           const cfg = LOGO_CONFIG[provider.key];
@@ -56,10 +56,10 @@ export default function ProviderSelector({ selected, onChange }: Props) {
             <button
               key={provider.key}
               onClick={() => onChange(provider.key)}
-              className={`flex items-center justify-center h-[80px] rounded-2xl border-2 transition-all ${
+              className={`flex h-[86px] items-center justify-center rounded-[1.5rem] border transition-all ${
                 isActive
-                  ? "border-primary bg-secondary/50 shadow-sm"
-                  : "border-border bg-card hover:border-primary/20"
+                  ? "border-foreground bg-white shadow-sm"
+                  : "border-border bg-white/65 backdrop-blur-xl hover:bg-white"
               }`}
             >
               <span

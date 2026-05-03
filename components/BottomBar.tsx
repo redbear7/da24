@@ -12,40 +12,34 @@ export default function BottomBar({ plan, onConsultClick }: Props) {
   const subsidy = plan?.subsidy ?? 450000;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-bottom-bar-bg safe-bottom">
-      <div className="max-w-[640px] mx-auto px-5 pt-4 pb-3">
-        {/* Price info rows */}
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[14px] text-bottom-bar-text/70">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-bottom-bar-bg backdrop-blur-2xl safe-bottom">
+      <div className="apple-container grid gap-3 py-3 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid gap-1 sm:grid-cols-2 sm:gap-6">
+          <div className="flex items-center justify-between gap-4 sm:block">
+            <span className="text-[13px] text-bottom-bar-text/60">
             예상 요금(결합할인)
-          </span>
-          <span className="text-[20px] font-extrabold text-bottom-bar-text">
+            </span>
+            <span className="block text-[20px] font-semibold text-bottom-bar-text">
             {monthlyPrice.toLocaleString()}원{" "}
             <span className="text-[15px] font-medium">/ 월</span>
-          </span>
-        </div>
+            </span>
+          </div>
 
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[14px] text-bottom-bar-text/70">
+          <div className="flex items-center justify-between gap-4 sm:block">
+            <span className="text-[13px] text-bottom-bar-text/60">
             법정 지원금 + 다이사 혜택
-          </span>
-          <div className="text-right">
-            <span className="text-[20px] font-extrabold text-bottom-bar-text">
+            </span>
+            <span className="block text-[20px] font-semibold text-bottom-bar-text">
               {subsidy.toLocaleString()}원 + ?
             </span>
           </div>
         </div>
 
-        <p className="text-[11px] text-bottom-bar-text/40 text-right mb-3">
-          설치 다음날 바로 지급
-        </p>
-
-        {/* CTA Button - matches original: white bg, blue text, full width */}
         <button
           onClick={onConsultClick}
-          className="w-full py-4 bg-white text-primary font-bold rounded-xl text-[18px] hover:bg-gray-50 active:scale-[0.98] transition-all"
+          className="min-h-12 rounded-full bg-white px-8 text-[16px] font-semibold text-foreground transition-transform active:scale-[0.98] md:min-w-[220px]"
         >
-          무료 상담 신청하기
+          무료 상담 신청
         </button>
       </div>
     </div>

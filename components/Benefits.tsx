@@ -29,12 +29,12 @@ const BENEFITS = [
 
 export default function Benefits() {
   return (
-    <section className="max-w-[640px] mx-auto px-5 py-2 flex flex-col gap-3">
+    <section className="apple-container grid gap-3 py-4 md:grid-cols-2">
       {BENEFITS.map((b) => {
         const Icon = b.icon;
         return (
-          <div key={b.title} className="bg-muted rounded-xl p-4 flex gap-3">
-            <div className="shrink-0 w-9 h-9 bg-secondary rounded-lg flex items-center justify-center">
+          <div key={b.title} className="flex gap-3 rounded-[1.5rem] border border-border bg-white/70 p-5 backdrop-blur-xl">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
               <Icon className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>

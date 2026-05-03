@@ -11,21 +11,20 @@ export default function PlanTypeSelector({ selected, onChange }: Props) {
   const types: PlanType[] = ["new", "change", "renew", "move"];
 
   return (
-    <section id="plan-selector" className="max-w-[640px] mx-auto px-5 pb-6">
-      <h2 className="text-[18px] font-bold text-foreground mb-4">가입 유형 선택</h2>
+    <section id="plan-selector" className="apple-container pb-6">
+      <h2 className="mb-4 text-[24px] font-semibold tracking-tight text-foreground">가입 유형 선택</h2>
 
-      {/* Tab row - matches original: bordered tabs, active has blue text + bottom border feel */}
-      <div className="grid grid-cols-4 border border-border rounded-xl overflow-hidden">
+      <div className="grid grid-cols-2 gap-2 rounded-[1.25rem] border border-border bg-white/55 p-1.5 backdrop-blur-xl sm:grid-cols-4">
         {types.map((type) => {
           const isActive = selected === type;
           return (
             <button
               key={type}
               onClick={() => onChange(type)}
-              className={`py-3.5 text-[14px] sm:text-[15px] font-semibold text-center transition-colors border-r last:border-r-0 border-border ${
+              className={`min-h-11 rounded-full px-3 text-center text-[14px] font-semibold transition-all sm:text-[15px] ${
                 isActive
-                  ? "bg-card text-primary"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
+                  ? "bg-foreground text-background shadow-sm"
+                  : "text-muted-foreground hover:bg-white hover:text-foreground"
               }`}
             >
               {PLAN_TYPE_LABELS[type]}
@@ -35,7 +34,7 @@ export default function PlanTypeSelector({ selected, onChange }: Props) {
       </div>
 
       {/* Description box */}
-      <div className="mt-4 px-4 py-4 bg-card border border-border rounded-xl">
+      <div className="mt-4 rounded-[1.25rem] border border-border bg-white/70 px-5 py-4 backdrop-blur-xl">
         <p className="text-[15px] font-bold text-foreground">
           {PLAN_TYPE_LABELS[selected]}이란?
         </p>

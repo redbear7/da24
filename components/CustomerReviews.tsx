@@ -75,17 +75,17 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function CustomerReviews() {
   return (
-    <section className="max-w-[640px] mx-auto py-6">
-      <h2 className="text-[18px] font-bold text-foreground mb-4 px-5">고객 후기</h2>
+    <section className="apple-container py-6">
+      <h2 className="mb-4 text-[24px] font-semibold tracking-tight text-foreground">고객 후기</h2>
 
       {/* 가로 스크롤 카드 */}
-      <div className="flex gap-3 overflow-x-auto px-5 pb-3 scrollbar-none"
+      <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {REVIEWS.map((r, i) => (
           <div
             key={i}
-            className="flex-none w-[240px] bg-card border border-border rounded-xl p-4"
+            className="w-[260px] flex-none rounded-[1.5rem] border border-border bg-white/75 p-4 backdrop-blur-xl"
           >
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[14px] font-semibold text-foreground">{r.name}</span>

@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import BundleBanner from "@/components/BundleBanner";
 import BundleModal from "@/components/BundleModal";
 import { supabase } from "@/lib/supabase";
 import { Truck, Home, Building2, Sparkles, Wifi, AirVent, Star, ChevronRight, ChevronLeft, X } from "lucide-react";
@@ -81,7 +79,6 @@ const DEFAULT_REVIEWS = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
   const [bannerIdx, setBannerIdx] = useState(0);
   const [selectedMove, setSelectedMove] = useState<typeof MOVING_CATEGORIES[number] | null>(null);
   const [banners, setBanners] = useState(DEFAULT_BANNERS);
@@ -106,11 +103,11 @@ export default function HomePage() {
 
   const nextBanner = useCallback(() => {
     setBannerIdx((i) => (i + 1) % banners.length);
-  }, []);
+  }, [banners.length]);
 
   const prevBanner = useCallback(() => {
     setBannerIdx((i) => (i - 1 + banners.length) % banners.length);
-  }, []);
+  }, [banners.length]);
 
   useEffect(() => {
     const t = setInterval(nextBanner, 4000);
@@ -121,81 +118,96 @@ export default function HomePage() {
     <div className="min-h-screen bg-background pb-6">
       <Header />
 
-      {/* ─── 이사 카테고리 ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pt-6 pb-2">
-        <div className="grid grid-cols-3 gap-3">
+      <section className="apple-container grid gap-6 pb-8 pt-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:pt-14">
+        <div className="apple-card relative overflow-hidden rounded-[2rem] px-6 py-9 sm:px-10 sm:py-12">
+          <div className="absolute right-[-120px] top-[-140px] h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+          <p className="mb-4 inline-flex rounded-full bg-foreground px-3 py-1 text-[12px] font-semibold text-background">
+            DA24 Concierge
+          </p>
+          <h1 className="max-w-2xl text-[34px] font-semibold leading-[1.08] tracking-tight text-foreground sm:text-[56px] lg:text-[64px]">
+            집에 필요한 일을,<br />
+            조용하고 선명하게.
+          </h1>
+          <p className="mt-5 max-w-xl text-[16px] leading-7 text-text-secondary sm:text-[19px]">
+            이사, 청소, 인터넷, 에어컨 상담을 하나의 흐름으로 정리했습니다. 과장된 광고 대신 필요한 선택지만 빠르게 확인하세요.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button
+              onClick={() => setSelectedMove(MOVING_CATEGORIES[0])}
+              className="min-h-12 rounded-full bg-primary px-6 text-[15px] font-semibold text-primary-foreground shadow-sm transition-transform active:scale-[0.98]"
+            >
+              이사 견적 시작
+            </button>
+            <Link
+              href="/internet"
+              className="apple-pill flex min-h-12 items-center justify-center rounded-full px-6 text-[15px] font-semibold text-foreground"
+            >
+              인터넷 혜택 보기
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          {[
+            { label: "상담 범위", value: "5개 홈서비스", tone: "bg-primary/10 text-primary" },
+            { label: "신청 방식", value: "모바일 우선", tone: "bg-accent/10 text-accent" },
+            { label: "확인 흐름", value: "견적부터 내역까지", tone: "bg-foreground/10 text-foreground" },
+          ].map((item) => (
+            <div key={item.label} className="rounded-[1.5rem] border border-border bg-white/70 p-5 backdrop-blur-xl">
+              <p className="text-[13px] font-medium text-text-muted">{item.label}</p>
+              <p className="mt-2 text-[24px] font-semibold tracking-tight text-foreground">{item.value}</p>
+              <div className={`mt-4 inline-flex rounded-full px-3 py-1 text-[12px] font-semibold ${item.tone}`}>
+                Designed for today
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="apple-container pb-6">
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[13px] font-semibold text-primary">Services</p>
+            <h2 className="mt-1 text-[28px] font-semibold tracking-tight text-foreground">필요한 홈서비스를 선택하세요.</h2>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
           {MOVING_CATEGORIES.map((cat) => (
             <button
               key={cat.title}
               onClick={() => setSelectedMove(cat)}
-              className="bg-card border border-border rounded-2xl p-4 hover:border-primary/40 transition-colors text-left"
+              className="group min-h-[154px] rounded-[1.5rem] border border-border bg-white/75 p-5 text-left shadow-sm backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
             >
-              <cat.icon className="w-6 h-6 text-primary mb-2" />
-              <h3 className="text-[15px] font-bold text-foreground leading-tight">{cat.title}</h3>
-              <p className="text-[12px] text-text-secondary mt-1">{cat.desc}</p>
-              <p className="text-[11px] text-text-muted mt-0.5">{cat.sub}</p>
+              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-foreground text-background">
+                <cat.icon className="h-5 w-5" />
+              </div>
+              <h3 className="text-[18px] font-semibold tracking-tight text-foreground">{cat.title}</h3>
+              <p className="mt-1 text-[13px] text-text-secondary">{cat.desc}</p>
+              <p className="mt-4 flex items-center text-[13px] font-semibold text-primary">
+                {cat.sub} <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </p>
             </button>
           ))}
-        </div>
-
-        {/* 트럭 달리는 애니메이션 */}
-        <div className="relative h-24 mt-4 mb-2 overflow-hidden select-none">
-          {/* 배경 도시 건물 (고정) */}
-          <div className="absolute bottom-3 left-0 right-0 flex items-end justify-center gap-3 opacity-15">
-            <div className="w-6 h-10 bg-primary rounded-sm" />
-            <div className="w-5 h-14 bg-primary rounded-sm" />
-            <div className="w-7 h-8 bg-primary rounded-sm" />
-            <div className="w-4 h-12 bg-primary rounded-sm" />
-            <div className="w-24" />
-            <div className="w-5 h-11 bg-primary rounded-sm" />
-            <div className="w-7 h-16 bg-primary rounded-sm" />
-            <div className="w-4 h-9 bg-primary rounded-sm" />
-            <div className="w-6 h-13 bg-primary rounded-sm" />
-          </div>
-
-          {/* 도로 라인 */}
-          <div className="absolute bottom-2 left-0 right-0 h-px bg-border" />
-          <div className="absolute bottom-2 left-0 right-0 flex gap-3 animate-road-slow">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="w-6 h-px bg-text-muted/30 shrink-0" />
-            ))}
-          </div>
-
-          {/* 트럭 (천천히 바운스) */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-[14px] animate-truck-slow">
-            <Truck className="w-20 h-20 text-primary/50" />
-          </div>
-
-          {/* 바퀴 먼지 */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-[55px]">
-            <div className="flex gap-1 animate-dust-slow">
-              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/15" />
-              <div className="w-1 h-1 rounded-full bg-text-muted/10" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 부가 서비스 ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-4">
-        <div className="grid grid-cols-3 gap-3">
           {SERVICES.map((svc) => (
             <Link
               key={svc.title}
               href={svc.href}
-              className="bg-card border border-border rounded-2xl p-4 text-center hover:border-primary/40 transition-colors relative"
+              className="group relative min-h-[154px] rounded-[1.5rem] border border-border bg-white/75 p-5 text-left shadow-sm backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
             >
               {svc.badge && (
                 <span
-                  className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white whitespace-nowrap ${
-                    svc.badgeType === "accent" ? "bg-accent" : "bg-primary"
-                  }`}
+                  className="absolute right-4 top-4 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground"
                 >
                   {svc.badge}
                 </span>
               )}
-              <svc.icon className="w-7 h-7 mx-auto mb-2 text-text-muted" />
-              <p className="text-[14px] font-semibold text-foreground">{svc.title}</p>
+              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-primary">
+                <svc.icon className="h-5 w-5" />
+              </div>
+              <p className="text-[18px] font-semibold tracking-tight text-foreground">{svc.title}</p>
+              <p className="mt-4 flex items-center text-[13px] font-semibold text-primary">
+                자세히 보기 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </p>
             </Link>
           ))}
         </div>
@@ -205,37 +217,37 @@ export default function HomePage() {
       {/* <BundleBanner onSelect={(bundle) => setSelectedBundle(bundle)} /> */}
 
       {/* ─── 대출 / 렌탈 ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-5">
-        <div className="grid grid-cols-2 border border-border rounded-xl overflow-hidden">
-          <Link href="/loan" className="py-3.5 text-center border-r border-border hover:bg-muted transition-colors">
-            <span className="text-[15px] font-semibold text-foreground">대출</span>
+      <section className="apple-container pb-6">
+        <div className="grid overflow-hidden rounded-[1.25rem] border border-border bg-white/70 backdrop-blur-xl sm:grid-cols-2">
+          <Link href="/loan" className="px-5 py-4 text-center transition-colors hover:bg-white sm:border-r sm:border-border">
+            <span className="text-[15px] font-semibold text-foreground">대출 비교</span>
           </Link>
-          <div className="py-3.5 text-center relative">
+          <div className="relative px-5 py-4 text-center">
             <span className="text-[15px] font-semibold text-text-muted">렌탈</span>
-            <span className="ml-1.5 text-[10px] font-medium text-text-muted bg-muted px-1.5 py-0.5 rounded-full">준비 중</span>
+            <span className="ml-1.5 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-text-muted">준비 중</span>
           </div>
         </div>
       </section>
 
-      {/* ─── 프로모 배너 슬라이더 ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-6">
+      <section className="apple-container pb-8">
         <div
-          className={`${banners[bannerIdx].bg} rounded-2xl px-5 py-5 text-white relative overflow-hidden min-h-[88px] transition-colors duration-500`}
+          className="relative min-h-[132px] overflow-hidden rounded-[1.75rem] bg-foreground px-6 py-6 text-white shadow-2xl transition-colors duration-500"
         >
-          <p className="text-[13px] text-white/70">{banners[bannerIdx].eyebrow}</p>
-          <p className="text-[17px] font-bold mt-0.5 pr-16">{banners[bannerIdx].title}</p>
+          <div className={`absolute inset-y-0 right-0 w-1/2 opacity-30 ${banners[bannerIdx].bg}`} />
+          <p className="relative text-[13px] text-white/65">{banners[bannerIdx].eyebrow}</p>
+          <p className="relative mt-1 max-w-xl pr-16 text-[24px] font-semibold tracking-tight">{banners[bannerIdx].title}</p>
 
           {/* 좌우 화살표 */}
           <button
             onClick={prevBanner}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-black/20 rounded-full hover:bg-black/30 transition-colors"
+            className="absolute right-14 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
             aria-label="이전 배너"
           >
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
           <button
             onClick={nextBanner}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-black/20 rounded-full hover:bg-black/30 transition-colors"
+            className="absolute right-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
             aria-label="다음 배너"
           >
             <ChevronRight className="w-4 h-4 text-white" />
@@ -258,9 +270,9 @@ export default function HomePage() {
       </section>
 
       {/* ─── 이사업체 고객 평가 (자동 슬라이드) ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-6 overflow-hidden">
+      <section className="apple-container overflow-hidden pb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[18px] font-bold text-foreground">이사업체 고객 평가</h2>
+          <h2 className="text-[28px] font-semibold tracking-tight text-foreground">고객 평가</h2>
           <Link
             href="/review"
             className="text-[13px] text-text-muted flex items-center gap-0.5 hover:text-foreground transition-colors"
@@ -272,12 +284,12 @@ export default function HomePage() {
       </section>
 
       {/* ─── 해피이사 캠페인 ─── */}
-      <section className="max-w-[640px] mx-auto px-5 pb-8">
+      <section className="apple-container pb-10">
         <p className="text-[12px] text-text-muted font-medium uppercase tracking-wide mb-1">
           다이사의 사회 공헌 활동
         </p>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[18px] font-bold text-foreground">해피이사 캠페인</h2>
+          <h2 className="text-[28px] font-semibold tracking-tight text-foreground">해피이사 캠페인</h2>
           <Link
             href="#"
             className="text-[13px] text-text-muted flex items-center gap-0.5 hover:text-foreground transition-colors"
@@ -285,12 +297,11 @@ export default function HomePage() {
             자세히 보기 <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="bg-secondary rounded-2xl overflow-hidden">
-          {/* 캠페인 배너 이미지 영역 */}
-          <div className="h-[140px] bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-2 border border-primary/10 rounded-2xl">
-            <Truck className="w-10 h-10 text-primary/40" />
+        <div className="overflow-hidden rounded-[1.75rem] border border-border bg-white/70 backdrop-blur-xl">
+          <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 bg-[linear-gradient(135deg,rgba(0,113,227,0.10),rgba(52,199,89,0.12))]">
+            <Truck className="w-10 h-10 text-primary/70" />
             <div className="text-center">
-              <p className="text-[14px] font-bold text-foreground">해피이사 캠페인</p>
+              <p className="text-[18px] font-semibold text-foreground">해피이사 캠페인</p>
               <p className="text-[12px] text-text-muted mt-0.5">어려운 이웃의 이사를 지원합니다</p>
             </div>
           </div>

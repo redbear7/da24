@@ -5,20 +5,20 @@ import { useEffect, useState } from "react";
 type ColorMode = "blue" | "red";
 
 const MODES: { key: ColorMode; color: string }[] = [
-  { key: "blue", color: "#2640E6" },
-  { key: "red", color: "#EA2804" },
+  { key: "blue", color: "#0071E3" },
+  { key: "red", color: "#FF3B30" },
 ];
 
 export default function ColorModeToggle() {
-  const [mode, setMode] = useState<ColorMode>("blue");
+  const [mode, setMode] = useState<ColorMode>(() => {
+    if (typeof window === "undefined") return "blue";
+    const saved = localStorage.getItem("color-mode") as ColorMode | null;
+    return saved && MODES.some((m) => m.key === saved) ? saved : "blue";
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem("color-mode") as ColorMode | null;
-    if (saved && MODES.some((m) => m.key === saved)) {
-      setMode(saved);
-    }
-    document.documentElement.setAttribute("data-color-mode", saved || "blue");
-  }, []);
+    document.documentElement.setAttribute("data-color-mode", mode);
+  }, [mode]);
 
   const handleChange = (m: ColorMode) => {
     setMode(m);
@@ -27,17 +27,18 @@ export default function ColorModeToggle() {
   };
 
   return (
-    <div className="flex items-center bg-muted rounded-full p-1 gap-1">
+    <div className="apple-pill flex items-center gap-1 rounded-full p-1">
       {MODES.map(({ key, color }) => (
         <button
           key={key}
           onClick={() => handleChange(key)}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-            mode === key ? "bg-white shadow-sm scale-110" : "hover:scale-105"
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+            mode === key ? "bg-white shadow-sm" : "hover:bg-white/70"
           }`}
+          aria-label={`${key} color mode`}
         >
           <span
-            className="w-3.5 h-3.5 rounded-full"
+            className="h-3.5 w-3.5 rounded-full"
             style={{ backgroundColor: color }}
           />
         </button>

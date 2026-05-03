@@ -37,8 +37,8 @@ export default function PlanComparison({
 
   if (provider === "other" || filtered.length === 0) {
     return (
-      <section className="max-w-[640px] mx-auto px-5 py-4">
-        <div className="bg-card rounded-xl p-8 text-center border border-border">
+      <section className="apple-container py-4">
+        <div className="rounded-[1.5rem] border border-border bg-white/70 p-8 text-center backdrop-blur-xl">
           <p className="text-text-muted text-[15px] leading-relaxed">
             {provider === "other"
               ? "알뜰 인터넷 요금제는 준비 중입니다."
@@ -52,8 +52,8 @@ export default function PlanComparison({
   }
 
   return (
-    <section className="max-w-[640px] mx-auto px-5 py-4">
-      <h2 className="text-[18px] font-bold text-foreground mb-1">요금제 비교</h2>
+    <section className="apple-container py-4">
+      <h2 className="mb-1 text-[24px] font-semibold tracking-tight text-foreground">요금제 비교</h2>
       <p className="text-[14px] text-text-muted mb-4">
         <span style={{ color: providerInfo ? PROVIDER_COLOR_VAR[providerInfo.key] : undefined }} className="font-bold">
           {providerInfo?.name}
@@ -61,26 +61,26 @@ export default function PlanComparison({
         요금제를 비교해 보세요
       </p>
 
-      <div className="flex flex-col gap-3">
+      <div className="grid gap-3 lg:grid-cols-2">
         {filtered.map((plan) => {
           const isSelected = selectedPlan === plan.id;
           return (
             <button
               key={plan.id}
               onClick={() => onSelectPlan(plan.id)}
-              className={`relative bg-card rounded-xl p-4 text-left transition-all border-2 ${
+              className={`relative rounded-[1.5rem] bg-white/75 p-5 text-left backdrop-blur-xl transition-all border ${
                 isSelected
-                  ? "border-primary shadow-sm"
-                  : "border-border hover:border-primary/20"
+                  ? "border-foreground shadow-sm"
+                  : "border-border hover:bg-white"
               }`}
             >
               {plan.isPopular && (
-                <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-bold text-accent-foreground">
                   <Star className="w-3 h-3 fill-current" /> BEST
                 </div>
               )}
               {!plan.isPopular && plan.id === maxSubsidyId && (
-                <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                <div className="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">
                   최대현금지원
                 </div>
               )}
@@ -128,7 +128,7 @@ export default function PlanComparison({
               </div>
 
               {isSelected && (
-                <div className="absolute top-3.5 right-3.5 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <div className="absolute right-3.5 top-3.5 flex h-6 w-6 items-center justify-center rounded-full bg-foreground">
                   <Check className="w-3.5 h-3.5 text-primary-foreground" />
                 </div>
               )}

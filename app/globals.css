@@ -1,50 +1,52 @@
 @import "tailwindcss";
 
-/* ========== 기본값 (블루모드) ========== */
+/* ========== Apple-inspired system theme ========== */
 :root {
-  --background: #FFFFFF;
-  --foreground: #1A1A2E;
-  --muted: #F4F6F9;
-  --muted-foreground: #8D95A7;
-  --card: #FFFFFF;
-  --card-foreground: #1A1A2E;
-  --border: #E5E7EB;
-  --border-subtle: #F0F1F5;
-  --primary: #2640E6;
+  --background: #F5F5F7;
+  --foreground: #1D1D1F;
+  --muted: #ECECF1;
+  --muted-foreground: #86868B;
+  --card: rgba(255, 255, 255, 0.82);
+  --card-foreground: #1D1D1F;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --primary: #0071E3;
   --primary-foreground: #FFFFFF;
-  --secondary: #F0F4FF;
-  --secondary-foreground: #2640E6;
-  --accent: #FF4D4D;
+  --secondary: #E8F2FF;
+  --secondary-foreground: #0066CC;
+  --accent: #34C759;
   --accent-foreground: #FFFFFF;
-  --text-secondary: #5A6278;
-  --text-muted: #8D95A7;
-  --bottom-bar-bg: #2640E6;
+  --text-secondary: #515154;
+  --text-muted: #86868B;
+  --bottom-bar-bg: rgba(29, 29, 31, 0.9);
   --bottom-bar-text: #FFFFFF;
   --provider-kt: #000000;
   --provider-lg: #E6007E;
   --provider-sk: #EA002C;
-  --ring: #2640E6;
+  --ring: #0071E3;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --shadow-soft: 0 24px 70px rgba(0, 0, 0, 0.08);
 }
 
-/* ========== 레드모드 ========== */
 [data-color-mode="red"] {
-  --background: #FFFFFF;
-  --foreground: #202020;
-  --muted: #F5F5F5;
-  --muted-foreground: #8D8D8D;
-  --card: #FFFFFF;
-  --card-foreground: #202020;
-  --border: #E0E0E0;
-  --border-subtle: #EEEEEE;
-  --primary: #EA2804;
+  --background: #F5F5F7;
+  --foreground: #1D1D1F;
+  --muted: #EFE8E6;
+  --muted-foreground: #8A817E;
+  --card: rgba(255, 255, 255, 0.82);
+  --card-foreground: #1D1D1F;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --primary: #FF3B30;
   --primary-foreground: #FFFFFF;
-  --secondary: #FFF2EF;
-  --secondary-foreground: #EA2804;
-  --accent: #EA2804;
+  --secondary: #FFF0EE;
+  --secondary-foreground: #D70015;
+  --accent: #007AFF;
   --accent-foreground: #FFFFFF;
-  --text-secondary: #4E4E4E;
-  --text-muted: #8D8D8D;
-  --bottom-bar-bg: #202020;
+  --text-secondary: #515154;
+  --text-muted: #86868B;
+  --bottom-bar-bg: rgba(29, 29, 31, 0.9);
   --bottom-bar-text: #FFFFFF;
   --provider-kt: #000000;
   --provider-lg: #E6007E;
@@ -77,14 +79,45 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Apple SD Gothic Neo', 'Pretendard', 'Malgun Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
 }
 
 html { scroll-behavior: smooth; }
 * { -webkit-tap-highlight-color: transparent; }
 ::selection { background: var(--primary); color: white; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 113, 227, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 4%, rgba(52, 199, 89, 0.10), transparent 26%),
+    linear-gradient(180deg, #ffffff 0%, #f5f5f7 48%, #ececf1 100%);
+}
+
+.apple-container {
+  width: min(calc(100% - 32px), 1120px);
+  margin-inline: auto;
+}
+
+.apple-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(24px);
+}
+
+.apple-pill {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+}
 
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 

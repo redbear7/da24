@@ -78,7 +78,7 @@ export default function InternetPage() {
       <HeroSection />
 
       {/* Divider */}
-      <div className="max-w-[640px] mx-auto px-5">
+      <div className="apple-container">
         <hr className="border-border" />
       </div>
 
@@ -91,7 +91,7 @@ export default function InternetPage() {
         <>
           <section className="max-w-[640px] mx-auto px-5 pb-6">
             {/* 트럭 일러스트 카드 */}
-            <div className="bg-secondary rounded-xl p-5 mb-3 flex items-center gap-4">
+            <div className="mb-3 flex items-center gap-4 rounded-[1.5rem] border border-border bg-white/70 p-5 backdrop-blur-xl">
               <div className="text-[56px] leading-none shrink-0">🚚</div>
               <div>
                 <h3 className="text-[16px] font-bold text-foreground mb-1">이사하셨나요?</h3>
@@ -103,7 +103,7 @@ export default function InternetPage() {
             </div>
 
             {/* 고객센터 안내 */}
-            <div className="bg-muted rounded-xl p-5">
+            <div className="rounded-[1.5rem] border border-border bg-white/70 p-5 backdrop-blur-xl">
               <p className="text-[14px] text-accent font-medium mb-3">
                 *이전설치는 통신사 고객센터로 직접 신청해 주세요.
               </p>
@@ -120,7 +120,7 @@ export default function InternetPage() {
         <>
           <ProviderSelector selected={provider} onChange={handleProviderChange} />
 
-          <div className="max-w-[640px] mx-auto px-5">
+          <div className="apple-container">
             <hr className="border-border" />
           </div>
 
@@ -132,25 +132,25 @@ export default function InternetPage() {
             onSelectPlan={setSelectedPlanId}
           />
 
-          <div className="max-w-[640px] mx-auto px-5 pt-4">
+          <div className="apple-container pt-4">
             <hr className="border-border" />
           </div>
 
           <CtaCards />
 
-          <div className="max-w-[640px] mx-auto px-5">
+          <div className="apple-container">
             <hr className="border-border" />
           </div>
 
           <ConsultationAgent />
 
-          <div className="max-w-[640px] mx-auto px-5">
+          <div className="apple-container">
             <hr className="border-border" />
           </div>
 
           <Benefits />
 
-          <div className="max-w-[640px] mx-auto px-5 pt-4">
+          <div className="apple-container pt-4">
             <hr className="border-border" />
           </div>
 

@@ -4,19 +4,19 @@ import { useState, useEffect, useCallback } from "react";
 
 const SLIDES = [
   {
-    headline: "통신사, 오래 쓴다고 좋은 게 아닙니다",
-    sublines: ["최대 48만 원 + 비밀 혜택까지", "잠자는 내 지원금 확인해 보세요!"],
-    note: "*당일 접수 빠른 설치 가능",
+    headline: "인터넷 선택을 더 가볍게.",
+    sublines: ["통신사별 요금과 혜택을 한 화면에서", "상담 전 필요한 정보만 먼저 확인하세요"],
+    note: "설치 일정과 지원금은 상담 후 확정됩니다",
   },
   {
-    headline: "3분 간편 상담으로 현금 혜택 확인",
-    sublines: ["설치 다음날 지원금 바로 입금", "다이사에서만 받는 비밀지원금 혜택"],
-    note: "*설치 완료 후 익일 현금 지급",
+    headline: "혜택은 크게, 과정은 단순하게.",
+    sublines: ["신규 가입, 변경, 재약정까지", "상황에 맞는 선택지를 정리해드립니다"],
+    note: "복잡한 약정 조건을 보기 쉽게 비교합니다",
   },
   {
-    headline: "780만 고객이 선택한 인터넷 비교",
-    sublines: ["통신사별 최적 상품 1:1 맞춤 추천", "복잡한 요금제, 한눈에 비교하세요"],
-    note: "*지급 보증 서비스 제공",
+    headline: "모바일에서도 한 손으로 비교.",
+    sublines: ["요금제 선택부터 상담 신청까지", "끊김 없는 흐름으로 설계했습니다"],
+    note: "DA24 홈서비스와 함께 묶어 상담할 수 있어요",
   },
 ];
 
@@ -35,26 +35,28 @@ export default function HeroSection() {
   const slide = SLIDES[current];
 
   return (
-    <section className="max-w-[640px] mx-auto px-5 pt-10 pb-6">
-      {/* Slide content */}
-      <h1 className="text-[26px] sm:text-[30px] font-bold text-foreground leading-snug tracking-tight min-h-[68px]">
-        {slide.headline}
-      </h1>
+    <section className="apple-container pt-10 pb-8">
+      <div className="apple-card overflow-hidden rounded-[2rem] px-6 py-9 sm:px-10 sm:py-12">
+        <p className="mb-4 inline-flex rounded-full bg-secondary px-3 py-1 text-[12px] font-semibold text-secondary-foreground">
+          Internet concierge
+        </p>
+        <h1 className="min-h-[90px] max-w-3xl text-[34px] font-semibold leading-[1.08] tracking-tight text-foreground sm:text-[44px] lg:text-[56px]">
+          {slide.headline}
+        </h1>
 
-      <div className="mt-3 space-y-0.5 min-h-[56px]">
-        {slide.sublines.map((line, i) => (
-          <p key={i} className="text-[16px] sm:text-[19px] font-medium text-primary">
-            {line}
-          </p>
-        ))}
-      </div>
+        <div className="mt-5 min-h-[62px] space-y-1">
+          {slide.sublines.map((line, i) => (
+            <p key={i} className="text-[16px] font-medium text-text-secondary sm:text-[20px]">
+              {line}
+            </p>
+          ))}
+        </div>
 
-      <p className="mt-3 text-[14px] text-accent font-medium">
-        {slide.note}
-      </p>
+        <p className="mt-5 text-[14px] font-medium text-primary">
+          {slide.note}
+        </p>
 
-      {/* 페이지 인디케이터 */}
-      <div className="flex items-center gap-2 mt-5">
+        <div className="mt-8 flex items-center gap-2">
         {SLIDES.map((_, i) => (
           <button
             key={i}
@@ -68,6 +70,7 @@ export default function HeroSection() {
         <span className="ml-auto text-[12px] text-text-muted tabular-nums">
           {current + 1}/{SLIDES.length}
         </span>
+        </div>
       </div>
     </section>
   );
