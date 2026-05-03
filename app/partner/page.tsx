@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  BadgePercent,
   Bell,
   BriefcaseBusiness,
   CalendarDays,
@@ -15,7 +16,9 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  RotateCcw,
   Search,
+  ShieldCheck,
   Sparkles,
   Star,
   WalletCards,
@@ -26,6 +29,7 @@ import {
 
 type RequestStatus = "new" | "accepted" | "quoted" | "scheduled" | "done" | "declined";
 type RequestTab = "new" | "active" | "done";
+type PartnerSection = "requests" | "schedule" | "billing";
 type ServiceType = "moving" | "clean" | "internet" | "aircon";
 
 type PartnerRequest = {
@@ -158,6 +162,43 @@ const TABS: Array<{ id: RequestTab; label: string }> = [
   { id: "done", label: "완료/불가" },
 ];
 
+const PRICING_PLANS = [
+  {
+    name: "스타터",
+    price: "무료",
+    description: "지역 런칭 초기 업체 검증용",
+    benefits: ["월 5건 무료 오더", "후기/평점 노출", "기본 지역 1곳 설정"],
+    active: false,
+  },
+  {
+    name: "성장형",
+    price: "월 99,000원",
+    description: "꾸준히 오더를 받고 싶은 업체",
+    benefits: ["월 30건 오더", "지역 3곳 설정", "우선 상담 알림"],
+    active: true,
+  },
+  {
+    name: "프리미엄",
+    price: "월 249,000원",
+    description: "상단 노출과 빠른 배정 중심",
+    benefits: ["월 90건 오더", "하이패스 10회", "전담 매니저 리포트"],
+    active: false,
+  },
+];
+
+const POINT_HISTORY = [
+  { label: "성산구 포장이사 오더", amount: "-8,000P", meta: "오늘 09:42", kind: "use" },
+  { label: "오더 정보 불일치 환급", amount: "+8,000P", meta: "어제 17:10", kind: "refund" },
+  { label: "월 기본 포인트 충전", amount: "+240,000P", meta: "5월 1일", kind: "charge" },
+];
+
+const REFUND_RULES = [
+  "날짜, 지역, 짐량 등 핵심 정보가 실제와 다르면 오더 포인트 전액 환급",
+  "고객 연락 불가가 24시간 이상 지속되면 검수 후 환급",
+  "업체 사정으로 거절한 오더는 환급 대상에서 제외",
+  "환급 요청은 오더 수령 후 48시간 안에 접수",
+];
+
 function formatWon(value: number) {
   return `${value.toLocaleString()}원`;
 }
@@ -170,6 +211,7 @@ function tabForStatus(status: RequestStatus): RequestTab {
 
 export default function PartnerPage() {
   const [requests, setRequests] = useState(INITIAL_REQUESTS);
+  const [activeSection, setActiveSection] = useState<PartnerSection>("requests");
   const [activeTab, setActiveTab] = useState<RequestTab>("new");
   const [selectedId, setSelectedId] = useState("");
   const [quoteMin, setQuoteMin] = useState("1200000");
@@ -178,6 +220,8 @@ export default function PartnerPage() {
 
   const selectedRequest = requests.find((request) => request.id === selectedId) ?? null;
   const visibleRequests = requests.filter((request) => tabForStatus(request.status) === activeTab);
+  const scheduledRequests = requests.filter((request) => request.status === "scheduled");
+  const activePlan = PRICING_PLANS.find((plan) => plan.active);
 
   const stats = useMemo(() => {
     const newCount = requests.filter((request) => request.status === "new").length;
@@ -241,7 +285,11 @@ export default function PartnerPage() {
             </Link>
             <div>
               <p className="text-[12px] font-semibold text-text-muted">DA24 Partner</p>
-              <h1 className="text-[18px] font-extrabold tracking-normal text-foreground">업체회원 요청함</h1>
+              <h1 className="text-[18px] font-extrabold tracking-normal text-foreground">
+                {activeSection === "requests" && "업체회원 요청함"}
+                {activeSection === "schedule" && "방문 일정"}
+                {activeSection === "billing" && "요금제와 포인트"}
+              </h1>
             </div>
           </div>
           <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary" aria-label="알림">
@@ -274,45 +322,47 @@ export default function PartnerPage() {
         </div>
       </section>
 
-      <section className="max-w-[640px] mx-auto px-5 pt-4">
-        <div className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
-          <Search className="h-4 w-4 text-text-muted" />
-          <input
-            aria-label="요청 검색"
-            placeholder="지역, 고객, 서비스로 검색"
-            className="min-w-0 flex-1 bg-transparent text-[15px] font-medium outline-none placeholder:text-text-muted"
-          />
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary" aria-label="필터">
-            <Filter className="h-4 w-4" />
-          </button>
-        </div>
-      </section>
+      {activeSection === "requests" && (
+        <>
+          <section className="max-w-[640px] mx-auto px-5 pt-4">
+            <div className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
+              <Search className="h-4 w-4 text-text-muted" />
+              <input
+                aria-label="요청 검색"
+                placeholder="지역, 고객, 서비스로 검색"
+                className="min-w-0 flex-1 bg-transparent text-[15px] font-medium outline-none placeholder:text-text-muted"
+              />
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-text-secondary" aria-label="필터">
+                <Filter className="h-4 w-4" />
+              </button>
+            </div>
+          </section>
 
-      <section className="max-w-[640px] mx-auto px-5 pt-4">
-        <div className="grid grid-cols-3 rounded-2xl bg-muted p-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`h-11 rounded-xl text-[14px] font-bold transition-colors ${
-                activeTab === tab.id ? "bg-card text-primary shadow-sm" : "text-text-secondary"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </section>
+          <section className="max-w-[640px] mx-auto px-5 pt-4">
+            <div className="grid grid-cols-3 rounded-2xl bg-muted p-1">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`h-11 rounded-xl text-[14px] font-bold transition-colors ${
+                    activeTab === tab.id ? "bg-card text-primary shadow-sm" : "text-text-secondary"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </section>
 
-      <section className="max-w-[640px] mx-auto space-y-3 px-5 pt-4">
-        {visibleRequests.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-border bg-card p-8 text-center">
-            <CheckCircle2 className="mx-auto h-9 w-9 text-text-muted" />
-            <p className="mt-3 text-[16px] font-bold text-foreground">현재 확인할 요청이 없습니다</p>
-            <p className="mt-1 text-[13px] text-text-secondary">새 요청이 들어오면 알림으로 바로 안내됩니다.</p>
-          </div>
-        ) : (
-          visibleRequests.map((request) => {
+          <section className="max-w-[640px] mx-auto space-y-3 px-5 pt-4">
+            {visibleRequests.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-border bg-card p-8 text-center">
+                <CheckCircle2 className="mx-auto h-9 w-9 text-text-muted" />
+                <p className="mt-3 text-[16px] font-bold text-foreground">현재 확인할 요청이 없습니다</p>
+                <p className="mt-1 text-[13px] text-text-secondary">새 요청이 들어오면 알림으로 바로 안내됩니다.</p>
+              </div>
+            ) : (
+              visibleRequests.map((request) => {
             const meta = SERVICE_META[request.serviceType];
             const Icon = meta.icon;
             const hasQuote = request.quoteMin && request.quoteMax;
@@ -406,9 +456,167 @@ export default function PartnerPage() {
                 </div>
               </article>
             );
-          })
-        )}
-      </section>
+              })
+            )}
+          </section>
+        </>
+      )}
+
+      {activeSection === "schedule" && (
+        <section className="max-w-[640px] mx-auto space-y-3 px-5 pt-4">
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <CalendarDays className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-text-muted">오늘 방문 일정</p>
+                <h2 className="text-[21px] font-extrabold text-foreground">{scheduledRequests.length}건 예약됨</h2>
+              </div>
+            </div>
+          </div>
+          {scheduledRequests.map((request) => (
+            <article key={request.id} className="rounded-3xl border border-border bg-card p-4">
+              <p className="text-[12px] font-bold text-primary">{request.id}</p>
+              <h3 className="mt-1 text-[18px] font-extrabold text-foreground">{request.title}</h3>
+              <div className="mt-3 grid gap-2 text-[14px] text-text-secondary">
+                <span className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-text-muted" />
+                  {request.requestedDate}
+                </span>
+                <span className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-text-muted" />
+                  {request.region} {request.route}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedId(request.id)}
+                className="mt-4 flex min-h-[44px] w-full items-center justify-center rounded-xl bg-secondary text-[14px] font-bold text-primary"
+              >
+                상담 기록 보기
+              </button>
+            </article>
+          ))}
+        </section>
+      )}
+
+      {activeSection === "billing" && (
+        <section className="max-w-[640px] mx-auto space-y-4 px-5 pt-4">
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div>
+              <div>
+                <p className="text-[13px] font-bold text-text-muted">현재 요금제</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <h2 className="text-[24px] font-extrabold text-foreground">{activePlan?.name}</h2>
+                  <span className="rounded-full bg-secondary px-3 py-1.5 text-[12px] font-bold text-primary">활성</span>
+                </div>
+                <p className="mt-1 text-[14px] text-text-secondary">{activePlan?.description}</p>
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-muted p-4">
+                <p className="text-[12px] font-bold text-text-muted">잔여 포인트</p>
+                <p className="mt-1 text-[22px] font-extrabold text-foreground">232,000P</p>
+              </div>
+              <div className="rounded-2xl bg-muted p-4">
+                <p className="text-[12px] font-bold text-text-muted">이번 달 오더</p>
+                <p className="mt-1 text-[22px] font-extrabold text-foreground">7 / 30건</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-[18px] font-extrabold text-foreground">요금제</h2>
+              <button className="text-[13px] font-bold text-primary">변경 상담</button>
+            </div>
+            <div className="space-y-3">
+              {PRICING_PLANS.map((plan) => (
+                <article
+                  key={plan.name}
+                  className={`rounded-3xl border p-4 ${
+                    plan.active ? "border-primary bg-secondary" : "border-border bg-card"
+                  }`}
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-[18px] font-extrabold text-foreground">{plan.name}</h3>
+                      {plan.active && <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white">사용중</span>}
+                    </div>
+                    <p className="mt-1 text-[13px] text-text-secondary">{plan.description}</p>
+                    <p className="mt-3 text-[18px] font-extrabold text-primary">{plan.price}</p>
+                  </div>
+                  <div className="mt-4 grid gap-2">
+                    {plan.benefits.map((benefit) => (
+                      <span key={benefit} className="flex items-center gap-2 text-[13px] text-text-secondary">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        {benefit}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <WalletCards className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">포인트 내역</h2>
+                <p className="text-[13px] text-text-secondary">오더 사용과 환급을 투명하게 기록합니다.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {POINT_HISTORY.map((history) => (
+                <div key={`${history.label}-${history.meta}`} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-full ${
+                        history.kind === "refund" ? "bg-emerald-50 text-emerald-700" : "bg-muted text-text-secondary"
+                      }`}
+                    >
+                      {history.kind === "refund" ? <RotateCcw className="h-4 w-4" /> : <BadgePercent className="h-4 w-4" />}
+                    </div>
+                    <div>
+                      <p className="text-[14px] font-bold text-foreground">{history.label}</p>
+                      <p className="text-[12px] text-text-muted">{history.meta}</p>
+                    </div>
+                  </div>
+                  <span className={`shrink-0 text-[14px] font-extrabold ${history.amount.startsWith("+") ? "text-emerald-700" : "text-foreground"}`}>
+                    {history.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">오더 환급 정책</h2>
+                <p className="text-[13px] text-text-secondary">업체가 신뢰할 수 있어야 오더를 꾸준히 받습니다.</p>
+              </div>
+            </div>
+            <ul className="mt-4 space-y-3">
+              {REFUND_RULES.map((rule) => (
+                <li key={rule} className="flex gap-2 text-[14px] leading-relaxed text-text-secondary">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>{rule}</span>
+                </li>
+              ))}
+            </ul>
+            <button className="mt-5 flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary text-[15px] font-extrabold text-white">
+              환급 요청하기
+            </button>
+          </div>
+        </section>
+      )}
 
       {selectedRequest && (
         <section className="fixed inset-0 z-50 flex items-end bg-black/35 px-0" aria-label="요청 상세">
@@ -522,14 +730,15 @@ export default function PartnerPage() {
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card/95 backdrop-blur safe-bottom">
         <div className="mx-auto grid max-w-[640px] grid-cols-3 px-5 py-2">
           {[
-            { label: "요청", icon: BriefcaseBusiness, active: true },
-            { label: "일정", icon: CalendarDays, active: false },
-            { label: "정산", icon: WalletCards, active: false },
+            { id: "requests" as const, label: "요청", icon: BriefcaseBusiness },
+            { id: "schedule" as const, label: "일정", icon: CalendarDays },
+            { id: "billing" as const, label: "정산", icon: WalletCards },
           ].map((item) => (
             <button
               key={item.label}
+              onClick={() => setActiveSection(item.id)}
               className={`flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-2xl text-[12px] font-bold ${
-                item.active ? "text-primary" : "text-text-muted"
+                activeSection === item.id ? "text-primary" : "text-text-muted"
               }`}
             >
               <item.icon className="h-5 w-5" />
