@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Apple SD Gothic Neo", "Pretendard", sans-serif;
+        color: #1d1d1f;
+      }
+
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 8%, rgba(0, 113, 227, 0.16), rgba(0, 113, 227, 0) 32%),
+          radial-gradient(circle at 88% 20%, rgba(52, 199, 89, 0.14), rgba(52, 199, 89, 0) 28%),
+          linear-gradient(180deg, #ffffff 0%, #f5f5f7 48%, #ececf1 100%);
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 132px 86px;
+        overflow: hidden;
+      }
+
+      .scene:not(.scene-1) {
+        opacity: 0;
+        filter: blur(22px);
+        transform: scale(1.025);
+      }
+
+      .brand {
+        position: absolute;
+        top: 76px;
+        left: 78px;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 74px;
+        height: 74px;
+        border-radius: 50%;
+        background: #e8f2ff;
+        color: #1d1d1f;
+        font-size: 34px;
+        font-weight: 800;
+        box-shadow: 0 20px 44px rgba(29, 29, 31, 0.16);
+      }
+
+      .brand-word {
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+      }
+
+      .brand-word strong {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .brand-word span {
+        margin-top: 8px;
+        color: #515154;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-self: flex-start;
+        padding: 15px 24px;
+        border-radius: 999px;
+        background: #e8f2ff;
+        color: #0057b8;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .blue-pill {
+        background: #e8f2ff;
+        color: #0057b8;
+      }
+
+      .headline {
+        max-width: 900px;
+        margin-top: 42px;
+        font-size: 104px;
+        font-weight: 900;
+        line-height: 1.03;
+        letter-spacing: -0.058em;
+      }
+
+      .headline.small {
+        font-size: 88px;
+        line-height: 1.05;
+      }
+
+      .body {
+        max-width: 760px;
+        margin-top: 40px;
+        color: #515154;
+        font-size: 38px;
+        font-weight: 500;
+        line-height: 1.48;
+        letter-spacing: -0.026em;
+      }
+
+      .hero-card {
+        margin-top: 84px;
+        width: 100%;
+        min-height: 390px;
+        padding: 48px;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        border-radius: 52px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 36px 90px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(26px);
+      }
+
+      .service-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        width: 100%;
+        margin-top: 64px;
+      }
+
+      .service-card {
+        min-height: 276px;
+        padding: 34px;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        border-radius: 42px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 26px 70px rgba(0, 0, 0, 0.07);
+      }
+
+      .service-icon {
+        display: grid;
+        place-items: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #e8f2ff;
+        color: #1d1d1f;
+        font-size: 34px;
+        font-weight: 800;
+      }
+
+      .service-card:nth-child(even) .service-icon {
+        background: #f0f7ff;
+        color: #0057b8;
+      }
+
+      .service-card h3 {
+        margin-top: 32px;
+        font-size: 44px;
+        font-weight: 850;
+        letter-spacing: -0.044em;
+      }
+
+      .service-card p {
+        margin-top: 12px;
+        color: #515154;
+        font-size: 24px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      .phone-shell {
+        position: relative;
+        width: 640px;
+        min-height: 1060px;
+        margin: 72px auto 0;
+        padding: 34px;
+        border: 2px solid rgba(0, 0, 0, 0.08);
+        border-radius: 76px;
+        background: #ffffff;
+        box-shadow: 0 46px 120px rgba(0, 0, 0, 0.14);
+      }
+
+      .phone-bar {
+        width: 168px;
+        height: 18px;
+        margin: 0 auto 48px;
+        border-radius: 999px;
+        background: #1d1d1f;
+      }
+
+      .flow-card {
+        margin-bottom: 22px;
+        padding: 32px;
+        border-radius: 34px;
+        background: #f5f5f7;
+      }
+
+      .flow-card strong {
+        display: block;
+        font-size: 36px;
+        font-weight: 850;
+        letter-spacing: -0.04em;
+      }
+
+      .flow-card span {
+        display: block;
+        margin-top: 8px;
+        color: #515154;
+        font-size: 23px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      .cta {
+        margin-top: 24px;
+        padding: 34px;
+        border-radius: 999px;
+        background: #e8f2ff;
+        color: #0057b8;
+        text-align: center;
+        font-size: 34px;
+        font-weight: 850;
+        letter-spacing: -0.03em;
+      }
+
+      .final-lockup {
+        align-items: center;
+        text-align: center;
+      }
+
+      .final-mark {
+        display: grid;
+        place-items: center;
+        width: 156px;
+        height: 156px;
+        border-radius: 50%;
+        background: #e8f2ff;
+        color: #1d1d1f;
+        font-size: 70px;
+        font-weight: 900;
+        box-shadow: 0 36px 90px rgba(29, 29, 31, 0.2);
+      }
+
+      .final-title {
+        margin-top: 56px;
+        font-size: 112px;
+        font-weight: 900;
+        line-height: 1.02;
+        letter-spacing: -0.06em;
+      }
+
+      .final-copy {
+        max-width: 760px;
+        margin-top: 38px;
+        color: #515154;
+        font-size: 36px;
+        font-weight: 550;
+        line-height: 1.46;
+        letter-spacing: -0.026em;
+      }
+
+      .final-cta {
+        margin-top: 72px;
+        padding: 30px 54px;
+        border-radius: 999px;
+        background: #e8f2ff;
+        color: #0057b8;
+        font-size: 34px;
+        font-weight: 850;
+        letter-spacing: -0.035em;
+      }
+
+      .glow {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .glow-a {
+        right: -170px;
+        top: 170px;
+        width: 460px;
+        height: 460px;
+        background: rgba(0, 113, 227, 0.14);
+        filter: blur(18px);
+      }
+
+      .glow-b {
+        left: -180px;
+        bottom: 160px;
+        width: 420px;
+        height: 420px;
+        background: rgba(52, 199, 89, 0.13);
+        filter: blur(24px);
+      }
+
+      .transition-wash {
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        pointer-events: none;
+        opacity: 0;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(30px);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="15"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="glow glow-a" data-layout-ignore></div>
+      <div class="glow glow-b" data-layout-ignore></div>
+
+      <div class="brand">
+        <div class="mark">✦</div>
+        <div class="brand-word">
+          <strong>DA24</strong>
+          <span>Home service concierge</span>
+        </div>
+      </div>
+
+      <section class="scene scene-1">
+        <div class="pill">DA24 Concierge</div>
+        <h1 class="headline">집에 필요한 일을, 조용하고 선명하게.</h1>
+        <p class="body">이사, 청소, 인터넷, 에어컨 상담을 하나의 흐름으로 정리했습니다.</p>
+        <div class="hero-card">
+          <div class="flow-card">
+            <strong>모바일에서 바로 시작</strong>
+            <span>복잡한 견적 과정을 한 손 흐름으로</span>
+          </div>
+          <div class="cta">무료 상담 시작하기</div>
+        </div>
+      </section>
+
+      <section class="scene scene-2">
+        <div class="pill blue-pill">Services</div>
+        <h2 class="headline small">필요한 홈서비스만 빠르게.</h2>
+        <div class="service-grid">
+          <div class="service-card">
+            <div class="service-icon">↗</div>
+            <h3>이사</h3>
+            <p>가정 · 소형 · 사무실</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">✧</div>
+            <h3>청소</h3>
+            <p>입주 · 이사 · 부분</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">⌁</div>
+            <h3>인터넷</h3>
+            <p>요금과 혜택 비교</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">◌</div>
+            <h3>에어컨</h3>
+            <p>설치 · 이전 상담</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene scene-3">
+        <div class="pill blue-pill">Mobile first</div>
+        <h2 class="headline small">상담 흐름도 더 가볍게.</h2>
+        <div class="phone-shell">
+          <div class="phone-bar"></div>
+          <div class="flow-card">
+            <strong>1. 서비스 선택</strong>
+            <span>필요한 항목만 고릅니다</span>
+          </div>
+          <div class="flow-card">
+            <strong>2. 조건 입력</strong>
+            <span>주소, 일정, 요청사항을 간단히</span>
+          </div>
+          <div class="flow-card">
+            <strong>3. 상담 연결</strong>
+            <span>전문 상담사가 빠르게 확인</span>
+          </div>
+          <div class="cta">견적부터 내역까지 한 번에</div>
+        </div>
+      </section>
+
+      <section class="scene scene-4 final-lockup">
+        <div class="final-mark">✦</div>
+        <h2 class="final-title">DA24</h2>
+        <p class="final-copy">집에 필요한 선택을 더 단순하게. 지금 무료 상담으로 시작하세요.</p>
+        <div class="final-cta">da24.co.kr</div>
+      </section>
+
+      <div class="transition-wash" data-layout-ignore></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      gsap.set(".scene-2, .scene-3, .scene-4", { opacity: 0, filter: "blur(22px)", scale: 1.025 });
+
+      function enterScene(scene, at) {
+        tl.from(scene + " .pill", { y: 40, opacity: 0, duration: 0.55, ease: "power3.out" }, at + 0.18);
+        tl.from(scene + " .headline", { y: 84, opacity: 0, scale: 0.98, duration: 0.78, ease: "expo.out" }, at + 0.34);
+        tl.from(scene + " .body", { y: 42, opacity: 0, duration: 0.62, ease: "sine.out" }, at + 0.72);
+      }
+
+      function enterHeadlineOnly(scene, at) {
+        tl.from(scene + " .pill", { y: 40, opacity: 0, duration: 0.55, ease: "power3.out" }, at + 0.18);
+        tl.from(scene + " .headline", { y: 84, opacity: 0, scale: 0.98, duration: 0.78, ease: "expo.out" }, at + 0.34);
+      }
+
+      function washTransition(fromScene, toScene, at) {
+        tl.to(".transition-wash", { opacity: 1, duration: 0.36, ease: "power2.inOut", overwrite: "auto" }, at);
+        tl.to(fromScene, { opacity: 0, filter: "blur(20px)", scale: 0.985, duration: 0.36, ease: "power2.inOut" }, at);
+        tl.set(toScene, { opacity: 1, filter: "blur(0px)", scale: 1 }, at + 0.18);
+        tl.to(".transition-wash", { opacity: 0, duration: 0.42, ease: "sine.inOut", overwrite: "auto" }, at + 0.24);
+      }
+
+      tl.from(".brand", { y: -28, opacity: 0, duration: 0.62, ease: "power2.out" }, 0.15);
+      tl.from(".glow-a", { scale: 0.82, opacity: 0, duration: 1.1, ease: "sine.out" }, 0.1);
+      tl.from(".glow-b", { scale: 0.86, opacity: 0, duration: 1.1, ease: "power1.out" }, 0.25);
+      enterScene(".scene-1", 0);
+      tl.from(".scene-1 .hero-card", { y: 78, opacity: 0, scale: 0.96, duration: 0.74, ease: "power4.out" }, 1.04);
+      tl.from(".scene-1 .flow-card", { x: -38, opacity: 0, duration: 0.52, ease: "back.out(1.35)" }, 1.26);
+      tl.from(".scene-1 .cta", { y: 34, opacity: 0, duration: 0.46, ease: "power2.out" }, 1.46);
+
+      washTransition(".scene-1", ".scene-2", 4.0);
+      enterHeadlineOnly(".scene-2", 4.12);
+      tl.from(".scene-2 .service-card", { y: 70, opacity: 0, scale: 0.94, duration: 0.6, stagger: 0.11, ease: "power3.out" }, 5.02);
+      tl.from(".scene-2 .service-icon", { rotation: -18, scale: 0.72, opacity: 0, duration: 0.46, stagger: 0.1, ease: "back.out(1.7)" }, 5.18);
+
+      washTransition(".scene-2", ".scene-3", 8.0);
+      enterHeadlineOnly(".scene-3", 8.1);
+      tl.from(".scene-3 .phone-shell", { y: 96, opacity: 0, scale: 0.94, duration: 0.78, ease: "expo.out" }, 8.94);
+      tl.from(".scene-3 .flow-card", { x: -48, opacity: 0, duration: 0.48, stagger: 0.16, ease: "power2.out" }, 9.34);
+      tl.from(".scene-3 .cta", { y: 34, opacity: 0, duration: 0.45, ease: "back.out(1.45)" }, 10.0);
+
+      washTransition(".scene-3", ".scene-4", 12.0);
+      tl.from(".scene-4 .final-mark", { y: 42, opacity: 0, scale: 0.72, duration: 0.68, ease: "back.out(1.55)" }, 12.36);
+      tl.from(".scene-4 .final-title", { y: 74, opacity: 0, scale: 0.96, duration: 0.78, ease: "expo.out" }, 12.55);
+      tl.from(".scene-4 .final-copy", { y: 42, opacity: 0, duration: 0.62, ease: "sine.out" }, 12.92);
+      tl.from(".scene-4 .final-cta", { y: 34, opacity: 0, scale: 0.96, duration: 0.5, ease: "power3.out" }, 13.25);
+      tl.to(".scene-4", { opacity: 0, filter: "blur(12px)", duration: 0.5, ease: "power1.in" }, 14.5);
+      tl.to(".brand", { opacity: 0, y: -20, duration: 0.38, ease: "power1.in" }, 14.55);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
