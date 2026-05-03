@@ -13,14 +13,18 @@ import {
   Clock3,
   Filter,
   Home,
+  MapPinned,
   MapPin,
   MessageCircle,
   Phone,
   RotateCcw,
   Search,
+  Settings,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Star,
+  Zap,
   WalletCards,
   Wifi,
   X,
@@ -29,7 +33,7 @@ import {
 
 type RequestStatus = "new" | "accepted" | "quoted" | "scheduled" | "done" | "declined";
 type RequestTab = "new" | "active" | "done";
-type PartnerSection = "requests" | "schedule" | "billing";
+type PartnerSection = "requests" | "schedule" | "billing" | "settings";
 type ServiceType = "moving" | "clean" | "internet" | "aircon";
 
 type PartnerRequest = {
@@ -199,6 +203,25 @@ const REFUND_RULES = [
   "환급 요청은 오더 수령 후 48시간 안에 접수",
 ];
 
+const OPERATING_REGIONS = [
+  { name: "창원시 성산구", orders: 18, active: true },
+  { name: "창원시 의창구", orders: 12, active: true },
+  { name: "창원시 진해구", orders: 9, active: true },
+  { name: "김해시 장유동", orders: 4, active: false },
+];
+
+const CLOSED_DATES = [
+  { date: "5월 8일", reason: "기존 예약 마감" },
+  { date: "5월 15일", reason: "장거리 이사 배정" },
+  { date: "5월 21일", reason: "정기 차량 점검" },
+];
+
+const HIGHPASS_OPTIONS = [
+  { label: "빠른 응답 오더 우선 수신", enabled: true },
+  { label: "당일/익일 일정만 먼저 받기", enabled: true },
+  { label: "예상 견적 80만원 이상만 수신", enabled: false },
+];
+
 function formatWon(value: number) {
   return `${value.toLocaleString()}원`;
 }
@@ -289,6 +312,7 @@ export default function PartnerPage() {
                 {activeSection === "requests" && "업체회원 요청함"}
                 {activeSection === "schedule" && "방문 일정"}
                 {activeSection === "billing" && "요금제와 포인트"}
+                {activeSection === "settings" && "업체 설정"}
               </h1>
             </div>
           </div>
@@ -618,6 +642,135 @@ export default function PartnerPage() {
         </section>
       )}
 
+      {activeSection === "settings" && (
+        <section className="max-w-[640px] mx-auto space-y-4 px-5 pt-4">
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <BriefcaseBusiness className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[13px] font-bold text-text-muted">파트너 프로필</p>
+                <h2 className="truncate text-[22px] font-extrabold text-foreground">창원 안심이사 파트너</h2>
+                <p className="text-[13px] text-text-secondary">포장이사 · 소형이사 · 입주청소 연계</p>
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-3 gap-2">
+              {[
+                { label: "평점", value: "4.8" },
+                { label: "응답률", value: "96%" },
+                { label: "경력", value: "12년" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl bg-muted p-3 text-center">
+                  <p className="text-[12px] font-bold text-text-muted">{item.label}</p>
+                  <p className="mt-1 text-[18px] font-extrabold text-foreground">{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <button className="mt-4 flex min-h-[46px] w-full items-center justify-center rounded-2xl bg-secondary text-[14px] font-extrabold text-primary">
+              업체 정보 수정
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <MapPinned className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">영업지역 설정</h2>
+                <p className="text-[13px] text-text-secondary">지역별 오더 수신 여부를 관리합니다.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {OPERATING_REGIONS.map((region) => (
+                <div key={region.name} className="flex items-center justify-between gap-3 rounded-2xl bg-muted p-3">
+                  <div>
+                    <p className="text-[15px] font-extrabold text-foreground">{region.name}</p>
+                    <p className="text-[12px] text-text-muted">최근 30일 오더 {region.orders}건</p>
+                  </div>
+                  <button
+                    className={`h-8 rounded-full px-3 text-[12px] font-bold ${
+                      region.active ? "bg-primary text-white" : "bg-card text-text-secondary"
+                    }`}
+                  >
+                    {region.active ? "수신중" : "대기"}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button className="mt-4 flex min-h-[46px] w-full items-center justify-center rounded-2xl border border-border text-[14px] font-extrabold text-foreground">
+              지역 추가하기
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <CalendarDays className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">마감일 관리</h2>
+                <p className="text-[13px] text-text-secondary">받기 어려운 날짜는 미리 막아둡니다.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {CLOSED_DATES.map((item) => (
+                <div key={item.date} className="flex items-center justify-between gap-3 rounded-2xl bg-muted p-3">
+                  <div>
+                    <p className="text-[15px] font-extrabold text-foreground">{item.date}</p>
+                    <p className="text-[12px] text-text-muted">{item.reason}</p>
+                  </div>
+                  <span className="rounded-full bg-card px-3 py-1 text-[12px] font-bold text-text-secondary">마감</span>
+                </div>
+              ))}
+            </div>
+            <button className="mt-4 flex min-h-[46px] w-full items-center justify-center rounded-2xl bg-primary text-[14px] font-extrabold text-white">
+              마감일 추가
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <Zap className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">하이패스 설정</h2>
+                <p className="text-[13px] text-text-secondary">급한 날짜와 좋은 조건의 오더를 먼저 받습니다.</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {HIGHPASS_OPTIONS.map((option) => (
+                <div key={option.label} className="flex items-center justify-between gap-3 rounded-2xl bg-muted p-3">
+                  <span className="text-[14px] font-bold text-foreground">{option.label}</span>
+                  <button
+                    className={`flex h-7 w-12 items-center rounded-full p-1 transition-colors ${
+                      option.enabled ? "justify-end bg-primary" : "justify-start bg-border"
+                    }`}
+                    aria-label={option.label}
+                  >
+                    <span className="h-5 w-5 rounded-full bg-white shadow-sm" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-border bg-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <SlidersHorizontal className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-extrabold text-foreground">오더 수신 기준</h2>
+                <p className="text-[13px] text-text-secondary">소형이사, 포장이사, 입주청소 연계 요청을 수신합니다.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {selectedRequest && (
         <section className="fixed inset-0 z-50 flex items-end bg-black/35 px-0" aria-label="요청 상세">
           <div className="safe-bottom max-h-[88vh] w-full overflow-y-auto rounded-t-[28px] bg-card">
@@ -728,11 +881,12 @@ export default function PartnerPage() {
       )}
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card/95 backdrop-blur safe-bottom">
-        <div className="mx-auto grid max-w-[640px] grid-cols-3 px-5 py-2">
+        <div className="mx-auto grid max-w-[640px] grid-cols-4 px-3 py-2">
           {[
             { id: "requests" as const, label: "요청", icon: BriefcaseBusiness },
             { id: "schedule" as const, label: "일정", icon: CalendarDays },
             { id: "billing" as const, label: "정산", icon: WalletCards },
+            { id: "settings" as const, label: "설정", icon: Settings },
           ].map((item) => (
             <button
               key={item.label}
